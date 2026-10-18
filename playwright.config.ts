@@ -1,0 +1,2 @@
+import { defineConfig } from '@playwright/test';
+export default defineConfig({testDir: './tests/e2e', workers: 1, use: {baseURL: process.env.DASHBOARD_ORIGIN||'http://127.0.0.1:3000', headless: true}, reporter: 'list',...(process.env.E2E_DATA_DIR?{webServer:{command:'node --import tsx scripts/e2e-server.ts',url:process.env.DASHBOARD_ORIGIN!,timeout:90000,reuseExistingServer:false,gracefulShutdown:{signal:'SIGTERM' as const,timeout:10000}}}:{})});

@@ -1,0 +1,18 @@
+{
+  "dry_run": true,
+  "rows": [
+    {
+      "name": "UK Casino · NB Max WO",
+      "page_key": "casino-nb-max-wo",
+      "url": "https://go.netbet.co.uk/casino/?lp=nb-max-wo",
+      "market": "UK",
+      "product": "casino",
+      "brand": "netbet",
+      "locale": "en-GB",
+      "currency": "GBP",
+      "report_timezone": "Europe/London",
+      "page_family": "nb-max",
+      "acquisition_goal": "registration_completed"
+    }
+  ]
+}

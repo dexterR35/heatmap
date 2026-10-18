@@ -1,0 +1,10 @@
+import {it,expect} from 'vitest';
+import Ajv from 'ajv';
+import addFormats from 'ajv-formats';
+import {batchSchema} from '../packages/contracts/events.js';
+import {batch} from './fixtures.js';
+const ajv=new Ajv({coerceTypes:false,removeAdditional:false});addFormats(ajv);const validate=ajv.compile(batchSchema);
+it('accepts the shared event contract',()=>expect(validate(batch())).toBe(true));
+it('rejects arbitrary metadata on every boundary',()=>{for(const location of ['root','context','consent','event','viewport']){const b:any=batch();const obj=location==='root'?b:location==='context'?b.context:location==='consent'?b.consent:location==='event'?b.events[0]:b.events[0].viewport;obj.email='secret@example.com';expect(validate(b)).toBe(false);}});
+it('rejects string-coerced coordinates',()=>{const b:any=batch('click');b.events[0].client_x='200';expect(validate(b)).toBe(false);});
+it('caps batch count and rejects nonfinite coordinates',()=>{const b=batch('click');b.events=Array(51).fill(b.events[0]);expect(validate(b)).toBe(false);const c:any=batch('click');c.events[0].document_x=Infinity;expect(validate(c)).toBe(false);});

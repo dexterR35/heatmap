@@ -1,0 +1,10 @@
+{
+  "included": ["https://go.netbet.ro/casino/?lp=halloween"],
+  "not_included": [
+    "https://go.netbet.ro/",
+    "https://go.netbet.ro/casino/",
+    "https://go.netbet.ro/casino/?lp=christmas",
+    "https://go.netbet.ro/casino/?lp=halloween&lp=halloween",
+    "https://casino.netbet.ro/casino/?lp=halloween"
+  ]
+}

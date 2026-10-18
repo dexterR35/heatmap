@@ -1,0 +1,10 @@
+import {serviceDatabase,shutdown} from '../server/service-runtime.js';
+import {processJobs} from './process.js';
+import {createTelemetry} from '../server/telemetry.js';
+const db=await serviceDatabase();
+const telemetry=createTelemetry('worker',db);
+let current:Promise<void>|undefined;
+const tick=()=>{if(current)return;current=processJobs(db,50).then(n=>{telemetry.recordWorker(n);}).catch(()=>{console.error('WORKER_DATABASE_UNAVAILABLE');}).finally(()=>{current=undefined;});};
+const timer=setInterval(tick,1000);tick();
+shutdown(async()=>{clearInterval(timer);await current;await telemetry.close();await db.close();});
+console.log('Worker ready · durable leases, bounded retry and idempotent aggregation v3');

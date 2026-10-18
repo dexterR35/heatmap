@@ -1,0 +1,116 @@
+/* Shared high-contrast text palette for all dashboard screens. */
+:root {
+  --text-primary: #182334;
+  --text-secondary: #334155;
+  --text-muted: #4b596c;
+  --text-accent: #ad3d18;
+  --sidebar-text: #c6cfdd;
+  --code-text: #d7e1ef;
+  --muted: var(--text-muted);
+}
+
+.page-table td,
+.element-report td,
+.audit-table td {
+  color: var(--text-secondary);
+}
+
+.page-heading p,
+.content-panel > p,
+.onboarding-card p {
+  font-size: 13px;
+}
+
+.page-table th {
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.page-table td,
+.analytic-metric small,
+.performance-grid small,
+.campaign-filters label {
+  font-size: 12px;
+}
+
+.table-detail,
+.analytic-metric span,
+.performance-grid span,
+.panel-header p,
+.analytics-footnote,
+.insight-list p,
+.funnel-step p,
+.table-footer,
+.small-note,
+.reference-details small,
+.reference-picker > span {
+  font-size: 11px;
+}
+
+.campaign-filters label,
+.analytic-metric small,
+.select-field,
+.date-popover label,
+.modal label,
+.login-card label {
+  font-weight: 550;
+}
+
+.btn.primary {
+  background: #bd411c;
+  border-color: #bd411c;
+}
+
+.btn.primary:hover {
+  background: #a73515;
+  border-color: #a73515;
+}
+
+.input::placeholder,
+.search-box input::placeholder,
+.login-card input::placeholder {
+  color: #596779;
+  opacity: 1;
+}
+
+.quiet-state,
+.reference-history-heading p,
+.no-references {
+  color: var(--text-muted);
+}
+
+.sidebar .nav-label {
+  color: #aebbd0;
+}
+
+.sidebar .icon-btn {
+  color: var(--sidebar-text);
+}
+
+.install-step > span,
+.elements-overlay span {
+  color: var(--text-primary);
+}
+
+.login-brand b {
+  color: var(--text-secondary);
+}
+
+.heading-dot {
+  color: var(--text-accent);
+}
+
+@media (max-width: 767px) {
+  .page-heading p,
+  .content-panel > p {
+    font-size: 12px;
+  }
+
+  .analytics-footnote,
+  .panel-header p,
+  .table-footer,
+  .table-detail,
+  .small-note {
+    font-size: 11px;
+  }
+}

@@ -1,0 +1,90 @@
+/* Dashboard UI: Inter throughout, white content and a charcoal navigation rail. */
+:root {
+ --brand-canvas: #fafafa;
+ --brand-paper: #ffffff;
+ --brand-card: #ffffff;
+ --brand-line: #e6e8e7;
+ --brand-muted: #525a56;
+ --font-display: Inter, Arial, Helvetica, sans-serif;
+ --line: #e6e8e7;
+ --chart-grid: #e8ece9;
+ --chart-cursor: #f0f3f1;
+ --chart-brush: #f8faf9;
+ --sidebar-text: #d3dad6;
+ background: #fafafa;
+}
+body,.login,.boot { background: #fafafa; }
+.app { background: #fafafa; background-image: none; }
+.sidebar { background: #202321; color: #e7ece9; border-color: #343a36; }
+.workspace-brand .brand b,.brand small { color: #f4f7f5; }
+.sidebar .graphoria-mark { background: #fff; border-radius: 3px; padding: 3px; }
+.workspace { background: #282d29; border-color: #3c443e; border-radius: 6px; }
+.workspace b { color: #f2f5f3; }
+.workspace small { color: #c1cbc4; }
+.workspace-icon { background: #343b35; border-color: #4b554d; color: #fff; border-radius: 4px; }
+.sidebar .nav-label { color: #acb8af; font: 600 10px/1.4 var(--font-body); letter-spacing: 1px; }
+.nav-item,.nav-group summary { color: #d6ded8; font: 500 13px/1.4 var(--font-body); letter-spacing: 0; border-radius: 5px; }
+.nav-item:hover,.nav-group summary:hover { background: #2d342e; }
+.nav-item.active { color: #fff; background: #353d36; box-shadow: inset 2px 0 var(--brand-orange); }
+.nav-item.active svg { color: #ff9579; }
+.nav-item small { color: #e1e8e3; background: #4b554d; }
+.nav-group { border-color: #3a413b; }
+.local-box { background: #292f2a; border-color: #414a42; border-radius: 5px; }
+.local-box>div { color: #e5ece7; }
+.local-box p { color: #c1cbc4; }
+.local-box a { color: #ffa58e; }
+.local-box .badge { background: #444e46; color: #e9efeb; }
+.profile { border-color: #3a413b; }
+.profile b { color: #edf3ef; }
+.profile small,.sidebar .icon-btn { color: #c1cbc4; }
+.sidebar .avatar { background: #444e46; border-color: #58645b; color: #fff; }
+.topbar { background: #fff; border-color: #e6e8e7; }
+.page-heading h1,.login-story h1 { font-family: var(--font-body); font-size: clamp(30px,3vw,40px); font-weight: 600; letter-spacing: -1.4px; line-height: 1.15; text-transform: none; }
+.eyebrow { font: 600 9px/1.3 var(--font-body); color: #59625c; letter-spacing: 1.2px; }
+h2,.panel-header h2,.content-panel>h2,.login-card h2,.reference-history-heading h2,.modal h2 { font-family: var(--font-body); font-size: 16px; font-weight: 600; letter-spacing: -.3px; line-height: 1.4; }
+.btn { background: #fff; color: #282e29; border-color: #d7ddd8; border-radius: 5px; font-family: var(--font-body); font-size: 12px; font-weight: 600; letter-spacing: 0; padding: 8px 13px; }
+.btn:hover { background: #f4f6f4; border-color: #a8b4aa; }
+.btn.primary { background: #202621; border-color: #202621; color: #fff; }
+.btn.primary svg { color: #ff9579; }
+.btn.primary:hover { background: #384139; border-color: #384139; color: #fff; }
+.panel,.stat,.overview-metrics,.more-analysis { border-color: #e0e5e1; border-radius: 7px; }
+.analytic-metric strong,.stat>strong { font-family: var(--font-body); font-size: 35px; font-weight: 600; letter-spacing: -1px; line-height: 1.1; }
+.analytic-metrics.overview-metrics:has(>.analytic-metric:nth-child(4)) { grid-template-columns: repeat(4,minmax(0,1fr)); }
+.analytic-metric,.overview-metrics .analytic-metric:nth-child(2),.panel-header,.analytics-footnote,.chart-data,.chart-method,.table-footer,.more-analysis[open]>summary { border-color: #e6eae7; }
+.input,.data-source-bar .input,.campaign-filters .input,.search-box,.reference-picker select,.select-field select,.date-popover input,.modal input,.modal select,.login-card input { background-color: #fff; border-color: #d7ddd8; border-radius: 5px; }
+.filters,.reference-picker,.date-popover,.modal { border-color: #e0e5e1; border-radius: 6px; }
+.device-switch,.chart-style { background: #f3f5f3; border-color: #e0e5e1; border-radius: 5px; }
+.device-switch button.selected,.chart-style button[aria-pressed=true] { background: #fff; }
+.chart-tooltip,.chart-page-picker summary,.table-explore { background: #fff; border-color: #d7ddd8; border-radius: 5px; }
+.page-table th { background: #f8faf8; color: #515c54; font-family: var(--font-body); font-size: 10px; font-weight: 600; letter-spacing: .5px; border-color: #e6eae7; }
+.page-table td { border-color: #edf0ed; }
+.page-table tr:hover td { background: #fafcfb; }
+.count-pill,.badge,.revision { background: #f0f3f1; color: #4b584e; border-color: #e0e5e1; }
+.more-analysis>summary strong { font-family: var(--font-body); font-size: 13px; font-weight: 600; letter-spacing: 0; }
+.more-analysis>summary:hover { background: #fafcfb; }
+.analytics-footnote,.performance-grid,.code-block,.code-block>div,.insight-note { background: #f7f9f7; border-color: #e6eae7; }
+.source-caption { border-color: #d7ddd8; }
+.login-card { border-color: #e0e5e1; border-radius: 8px; }
+.login-story h1 { font-size: clamp(42px,4.5vw,64px); }
+.login-story>.badge { background: #fff0ea; color: #963817; }
+.login-card h2 { font-size: 22px; }
+.login-card>.btn { font-family: var(--font-body); font-size: 13px; }
+.login-help code { background: #f7f9f7; border-color: #e6eae7; }
+@media(max-width:1200px) { .heading-actions .btn { font-size: 12px; } .page-heading h1 { font-size: 35px; } }
+@media(max-width:1100px) { .analytic-metrics.overview-metrics:has(>.analytic-metric:nth-child(4)) { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media(max-width:767px) {
+ .sidebar { background: #202321; }
+ .workspace-navigation>.nav-item,.nav-group summary { font-family: var(--font-body); font-size: 11px; letter-spacing: 0; }
+ .nav-group[open]>div { background: #292f2a; border-color: #4b554d; }
+ .nav-group .nav-item { font-size: 13px; }
+ .page-heading h1 { font-size: 32px; letter-spacing: -1px; }
+ .eyebrow { font-size: 8px; }
+ .heading-actions .btn { font-size: 12px; }
+ .panel-header h2,.chart-card .panel-header h2 { font-size: 15px; }
+ .overview-metrics .analytic-metric strong { font-size: 27px; letter-spacing: -1px; }
+ .stat>strong { font-size: 30px; }
+ .page-table th { font-size: 9px; }
+ .more-analysis>summary strong { font-size: 13px; }
+ .login-story h1 { font-size: 43px; letter-spacing: -1.4px; }
+ .modal h2,.content-panel>h2 { font-size: 17px; }
+}

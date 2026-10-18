@@ -1,0 +1,14 @@
+import {build} from 'esbuild';
+import {build as viteBuild} from 'vite';
+import {createHash} from 'node:crypto';
+import {mkdir,writeFile,readFile} from 'node:fs/promises';
+import {gzipSync} from 'node:zlib';
+import {batchSchema} from '../packages/contracts/events.js';
+await mkdir('dist/sdk',{recursive:true});
+const sdk=await build({entryPoints:['apps/tracker/tracker.ts'],bundle:true,write:false,format:'iife',target:'es2022',minify:true});
+const bytes=sdk.outputFiles[0].contents,hash=createHash('sha256').update(bytes).digest('hex').slice(0,16),sri='sha384-'+createHash('sha384').update(bytes).digest('base64'),file=`tracker.1.0.0.${hash}.js`;
+await writeFile('dist/sdk/'+file,bytes);await writeFile('dist/sdk/artifact.json',JSON.stringify({version:'1.0.0',file,sri,bytes:bytes.length,gzip_bytes:gzipSync(bytes).length},null,2));
+await build({entryPoints:['apps/tracker/bootstrap.ts'],bundle:true,outfile:'dist/sdk/bootstrap.js',format:'iife',target:'es2022',minify:true});
+await mkdir('docs',{recursive:true});await writeFile('docs/event-schema.json',JSON.stringify(batchSchema,null,2));
+await import('./openapi.js');
+await viteBuild();console.log(`SDK ${gzipSync(bytes).length} bytes gzip · SRI generated · Dashboard built`);

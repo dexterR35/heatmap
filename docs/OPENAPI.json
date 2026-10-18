@@ -1,0 +1,5278 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "NetBet Heatmap Studio · local synthetic API",
+    "version": "0.4.0",
+    "description": "Reference route inventory and exact event schema. Management routes require session auth plus expected Host; mutations require expected Origin and X-CSRF-Token. Route-specific management body/query schemas remain in management.ts."
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:3000",
+      "description": "Private management routes"
+    },
+    {
+      "url": "http://127.0.0.1:8080",
+      "description": "Public collector allowlist only"
+    }
+  ],
+  "paths": {
+    "/v1/events": {
+      "post": {
+        "summary": "Strict event ingestion; requires exact approved Origin; commits before 204",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                  "schema_version",
+                  "sdk_version",
+                  "site_key",
+                  "batch_id",
+                  "config_version",
+                  "view_id",
+                  "view_started_at",
+                  "sample_rate",
+                  "consent",
+                  "context",
+                  "events"
+                ],
+                "properties": {
+                  "schema_version": {
+                    "const": 1,
+                    "type": "number"
+                  },
+                  "sdk_version": {
+                    "maxLength": 32,
+                    "type": "string"
+                  },
+                  "site_key": {
+                    "pattern": "^site_[a-zA-Z0-9_-]{8,90}$",
+                    "maxLength": 96,
+                    "type": "string"
+                  },
+                  "batch_id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "config_version": {
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  "view_id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "view_started_at": {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  "sample_rate": {
+                    "minimum": 0.000001,
+                    "maximum": 1,
+                    "type": "number"
+                  },
+                  "consent": {
+                    "additionalProperties": false,
+                    "type": "object",
+                    "required": [
+                      "analytics",
+                      "policy_version"
+                    ],
+                    "properties": {
+                      "analytics": {
+                        "const": true,
+                        "type": "boolean"
+                      },
+                      "policy_version": {
+                        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                        "maxLength": 64,
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "context": {
+                    "additionalProperties": false,
+                    "type": "object",
+                    "required": [
+                      "page_key",
+                      "revision",
+                      "locale",
+                      "variant",
+                      "state",
+                      "campaign"
+                    ],
+                    "properties": {
+                      "page_key": {
+                        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      "revision": {
+                        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      "locale": {
+                        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      "variant": {
+                        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      "state": {
+                        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      "campaign": {
+                        "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      "acquisition_id": {
+                        "format": "uuid",
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "events": {
+                    "minItems": 1,
+                    "maxItems": 50,
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "required": [
+                            "event_id",
+                            "seq",
+                            "elapsed_ms",
+                            "segment_id",
+                            "viewport",
+                            "type"
+                          ],
+                          "properties": {
+                            "event_id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "seq": {
+                              "minimum": 0,
+                              "maximum": 20000,
+                              "type": "integer"
+                            },
+                            "elapsed_ms": {
+                              "minimum": 0,
+                              "maximum": 86400000,
+                              "type": "number"
+                            },
+                            "segment_id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "viewport": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "required": [
+                                "width",
+                                "height",
+                                "dpr",
+                                "visual_scale",
+                                "visual_offset_x",
+                                "visual_offset_y",
+                                "scroll_x",
+                                "scroll_y",
+                                "document_width",
+                                "document_height"
+                              ],
+                              "properties": {
+                                "width": {
+                                  "minimum": 240,
+                                  "maximum": 7680,
+                                  "type": "integer"
+                                },
+                                "height": {
+                                  "minimum": 200,
+                                  "maximum": 4320,
+                                  "type": "integer"
+                                },
+                                "dpr": {
+                                  "minimum": 0.5,
+                                  "maximum": 8,
+                                  "type": "number"
+                                },
+                                "visual_scale": {
+                                  "minimum": 0.25,
+                                  "maximum": 8,
+                                  "type": "number"
+                                },
+                                "visual_offset_x": {
+                                  "minimum": -10000,
+                                  "maximum": 10000,
+                                  "type": "number"
+                                },
+                                "visual_offset_y": {
+                                  "minimum": -10000,
+                                  "maximum": 10000,
+                                  "type": "number"
+                                },
+                                "scroll_x": {
+                                  "minimum": 0,
+                                  "maximum": 100000,
+                                  "type": "number"
+                                },
+                                "scroll_y": {
+                                  "minimum": 0,
+                                  "maximum": 100000,
+                                  "type": "number"
+                                },
+                                "document_width": {
+                                  "minimum": 240,
+                                  "maximum": 100000,
+                                  "type": "integer"
+                                },
+                                "document_height": {
+                                  "minimum": 200,
+                                  "maximum": 100000,
+                                  "type": "integer"
+                                }
+                              }
+                            },
+                            "type": {
+                              "const": "page_view",
+                              "type": "string"
+                            }
+                          }
+                        },
+                        {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "required": [
+                            "event_id",
+                            "seq",
+                            "elapsed_ms",
+                            "segment_id",
+                            "viewport",
+                            "type",
+                            "segment_ordinal",
+                            "geometry_state"
+                          ],
+                          "properties": {
+                            "event_id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "seq": {
+                              "minimum": 0,
+                              "maximum": 20000,
+                              "type": "integer"
+                            },
+                            "elapsed_ms": {
+                              "minimum": 0,
+                              "maximum": 86400000,
+                              "type": "number"
+                            },
+                            "segment_id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "viewport": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "required": [
+                                "width",
+                                "height",
+                                "dpr",
+                                "visual_scale",
+                                "visual_offset_x",
+                                "visual_offset_y",
+                                "scroll_x",
+                                "scroll_y",
+                                "document_width",
+                                "document_height"
+                              ],
+                              "properties": {
+                                "width": {
+                                  "minimum": 240,
+                                  "maximum": 7680,
+                                  "type": "integer"
+                                },
+                                "height": {
+                                  "minimum": 200,
+                                  "maximum": 4320,
+                                  "type": "integer"
+                                },
+                                "dpr": {
+                                  "minimum": 0.5,
+                                  "maximum": 8,
+                                  "type": "number"
+                                },
+                                "visual_scale": {
+                                  "minimum": 0.25,
+                                  "maximum": 8,
+                                  "type": "number"
+                                },
+                                "visual_offset_x": {
+                                  "minimum": -10000,
+                                  "maximum": 10000,
+                                  "type": "number"
+                                },
+                                "visual_offset_y": {
+                                  "minimum": -10000,
+                                  "maximum": 10000,
+                                  "type": "number"
+                                },
+                                "scroll_x": {
+                                  "minimum": 0,
+                                  "maximum": 100000,
+                                  "type": "number"
+                                },
+                                "scroll_y": {
+                                  "minimum": 0,
+                                  "maximum": 100000,
+                                  "type": "number"
+                                },
+                                "document_width": {
+                                  "minimum": 240,
+                                  "maximum": 100000,
+                                  "type": "integer"
+                                },
+                                "document_height": {
+                                  "minimum": 200,
+                                  "maximum": 100000,
+                                  "type": "integer"
+                                }
+                              }
+                            },
+                            "type": {
+                              "const": "segment_start",
+                              "type": "string"
+                            },
+                            "segment_ordinal": {
+                              "minimum": 0,
+                              "maximum": 1000,
+                              "type": "integer"
+                            },
+                            "geometry_state": {
+                              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                              "maxLength": 64,
+                              "type": "string"
+                            }
+                          }
+                        },
+                        {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "required": [
+                            "event_id",
+                            "seq",
+                            "elapsed_ms",
+                            "segment_id",
+                            "viewport",
+                            "type",
+                            "client_x",
+                            "client_y",
+                            "document_x",
+                            "document_y",
+                            "pointer",
+                            "layer"
+                          ],
+                          "properties": {
+                            "event_id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "seq": {
+                              "minimum": 0,
+                              "maximum": 20000,
+                              "type": "integer"
+                            },
+                            "elapsed_ms": {
+                              "minimum": 0,
+                              "maximum": 86400000,
+                              "type": "number"
+                            },
+                            "segment_id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "viewport": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "required": [
+                                "width",
+                                "height",
+                                "dpr",
+                                "visual_scale",
+                                "visual_offset_x",
+                                "visual_offset_y",
+                                "scroll_x",
+                                "scroll_y",
+                                "document_width",
+                                "document_height"
+                              ],
+                              "properties": {
+                                "width": {
+                                  "minimum": 240,
+                                  "maximum": 7680,
+                                  "type": "integer"
+                                },
+                                "height": {
+                                  "minimum": 200,
+                                  "maximum": 4320,
+                                  "type": "integer"
+                                },
+                                "dpr": {
+                                  "minimum": 0.5,
+                                  "maximum": 8,
+                                  "type": "number"
+                                },
+                                "visual_scale": {
+                                  "minimum": 0.25,
+                                  "maximum": 8,
+                                  "type": "number"
+                                },
+                                "visual_offset_x": {
+                                  "minimum": -10000,
+                                  "maximum": 10000,
+                                  "type": "number"
+                                },
+                                "visual_offset_y": {
+                                  "minimum": -10000,
+                                  "maximum": 10000,
+                                  "type": "number"
+                                },
+                                "scroll_x": {
+                                  "minimum": 0,
+                                  "maximum": 100000,
+                                  "type": "number"
+                                },
+                                "scroll_y": {
+                                  "minimum": 0,
+                                  "maximum": 100000,
+                                  "type": "number"
+                                },
+                                "document_width": {
+                                  "minimum": 240,
+                                  "maximum": 100000,
+                                  "type": "integer"
+                                },
+                                "document_height": {
+                                  "minimum": 200,
+                                  "maximum": 100000,
+                                  "type": "integer"
+                                }
+                              }
+                            },
+                            "type": {
+                              "const": "click",
+                              "type": "string"
+                            },
+                            "client_x": {
+                              "minimum": 0,
+                              "maximum": 100000,
+                              "type": "number"
+                            },
+                            "client_y": {
+                              "minimum": 0,
+                              "maximum": 100000,
+                              "type": "number"
+                            },
+                            "document_x": {
+                              "minimum": 0,
+                              "maximum": 100000,
+                              "type": "number"
+                            },
+                            "document_y": {
+                              "minimum": 0,
+                              "maximum": 100000,
+                              "type": "number"
+                            },
+                            "pointer": {
+                              "anyOf": [
+                                {
+                                  "const": "mouse",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "touch",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "pen",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "layer": {
+                              "anyOf": [
+                                {
+                                  "const": "document",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "fixed",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "sticky",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "element-only",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "target": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "required": [
+                                "element_id",
+                                "x_fraction",
+                                "y_fraction",
+                                "rect"
+                              ],
+                              "properties": {
+                                "element_id": {
+                                  "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                                  "maxLength": 64,
+                                  "type": "string"
+                                },
+                                "x_fraction": {
+                                  "minimum": 0,
+                                  "maximum": 1,
+                                  "type": "number"
+                                },
+                                "y_fraction": {
+                                  "minimum": 0,
+                                  "maximum": 1,
+                                  "type": "number"
+                                },
+                                "rect": {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "required": [
+                                    "x",
+                                    "y",
+                                    "width",
+                                    "height"
+                                  ],
+                                  "properties": {
+                                    "x": {
+                                      "minimum": -10000,
+                                      "maximum": 100000,
+                                      "type": "number"
+                                    },
+                                    "y": {
+                                      "minimum": -10000,
+                                      "maximum": 100000,
+                                      "type": "number"
+                                    },
+                                    "width": {
+                                      "minimum": 0.01,
+                                      "maximum": 100000,
+                                      "type": "number"
+                                    },
+                                    "height": {
+                                      "minimum": 0.01,
+                                      "maximum": 100000,
+                                      "type": "number"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "required": [
+                            "event_id",
+                            "seq",
+                            "elapsed_ms",
+                            "segment_id",
+                            "viewport",
+                            "type",
+                            "action_id",
+                            "method"
+                          ],
+                          "properties": {
+                            "event_id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "seq": {
+                              "minimum": 0,
+                              "maximum": 20000,
+                              "type": "integer"
+                            },
+                            "elapsed_ms": {
+                              "minimum": 0,
+                              "maximum": 86400000,
+                              "type": "number"
+                            },
+                            "segment_id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "viewport": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "required": [
+                                "width",
+                                "height",
+                                "dpr",
+                                "visual_scale",
+                                "visual_offset_x",
+                                "visual_offset_y",
+                                "scroll_x",
+                                "scroll_y",
+                                "document_width",
+                                "document_height"
+                              ],
+                              "properties": {
+                                "width": {
+                                  "minimum": 240,
+                                  "maximum": 7680,
+                                  "type": "integer"
+                                },
+                                "height": {
+                                  "minimum": 200,
+                                  "maximum": 4320,
+                                  "type": "integer"
+                                },
+                                "dpr": {
+                                  "minimum": 0.5,
+                                  "maximum": 8,
+                                  "type": "number"
+                                },
+                                "visual_scale": {
+                                  "minimum": 0.25,
+                                  "maximum": 8,
+                                  "type": "number"
+                                },
+                                "visual_offset_x": {
+                                  "minimum": -10000,
+                                  "maximum": 10000,
+                                  "type": "number"
+                                },
+                                "visual_offset_y": {
+                                  "minimum": -10000,
+                                  "maximum": 10000,
+                                  "type": "number"
+                                },
+                                "scroll_x": {
+                                  "minimum": 0,
+                                  "maximum": 100000,
+                                  "type": "number"
+                                },
+                                "scroll_y": {
+                                  "minimum": 0,
+                                  "maximum": 100000,
+                                  "type": "number"
+                                },
+                                "document_width": {
+                                  "minimum": 240,
+                                  "maximum": 100000,
+                                  "type": "integer"
+                                },
+                                "document_height": {
+                                  "minimum": 200,
+                                  "maximum": 100000,
+                                  "type": "integer"
+                                }
+                              }
+                            },
+                            "type": {
+                              "const": "activation",
+                              "type": "string"
+                            },
+                            "action_id": {
+                              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                              "maxLength": 64,
+                              "type": "string"
+                            },
+                            "element_id": {
+                              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                              "maxLength": 64,
+                              "type": "string"
+                            },
+                            "method": {
+                              "anyOf": [
+                                {
+                                  "const": "pointer",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "keyboard",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "host",
+                                  "type": "string"
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "required": [
+                            "event_id",
+                            "seq",
+                            "elapsed_ms",
+                            "segment_id",
+                            "viewport",
+                            "type",
+                            "max_reach_px",
+                            "max_reach_percent",
+                            "max_scroll_percent",
+                            "visible_ms",
+                            "geometry_stable"
+                          ],
+                          "properties": {
+                            "event_id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "seq": {
+                              "minimum": 0,
+                              "maximum": 20000,
+                              "type": "integer"
+                            },
+                            "elapsed_ms": {
+                              "minimum": 0,
+                              "maximum": 86400000,
+                              "type": "number"
+                            },
+                            "segment_id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "viewport": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "required": [
+                                "width",
+                                "height",
+                                "dpr",
+                                "visual_scale",
+                                "visual_offset_x",
+                                "visual_offset_y",
+                                "scroll_x",
+                                "scroll_y",
+                                "document_width",
+                                "document_height"
+                              ],
+                              "properties": {
+                                "width": {
+                                  "minimum": 240,
+                                  "maximum": 7680,
+                                  "type": "integer"
+                                },
+                                "height": {
+                                  "minimum": 200,
+                                  "maximum": 4320,
+                                  "type": "integer"
+                                },
+                                "dpr": {
+                                  "minimum": 0.5,
+                                  "maximum": 8,
+                                  "type": "number"
+                                },
+                                "visual_scale": {
+                                  "minimum": 0.25,
+                                  "maximum": 8,
+                                  "type": "number"
+                                },
+                                "visual_offset_x": {
+                                  "minimum": -10000,
+                                  "maximum": 10000,
+                                  "type": "number"
+                                },
+                                "visual_offset_y": {
+                                  "minimum": -10000,
+                                  "maximum": 10000,
+                                  "type": "number"
+                                },
+                                "scroll_x": {
+                                  "minimum": 0,
+                                  "maximum": 100000,
+                                  "type": "number"
+                                },
+                                "scroll_y": {
+                                  "minimum": 0,
+                                  "maximum": 100000,
+                                  "type": "number"
+                                },
+                                "document_width": {
+                                  "minimum": 240,
+                                  "maximum": 100000,
+                                  "type": "integer"
+                                },
+                                "document_height": {
+                                  "minimum": 200,
+                                  "maximum": 100000,
+                                  "type": "integer"
+                                }
+                              }
+                            },
+                            "type": {
+                              "const": "progress",
+                              "type": "string"
+                            },
+                            "max_reach_px": {
+                              "minimum": 0,
+                              "maximum": 100000,
+                              "type": "number"
+                            },
+                            "max_reach_percent": {
+                              "minimum": 0,
+                              "maximum": 100,
+                              "type": "number"
+                            },
+                            "max_scroll_percent": {
+                              "minimum": 0,
+                              "maximum": 100,
+                              "type": "number"
+                            },
+                            "visible_ms": {
+                              "minimum": 0,
+                              "maximum": 86400000,
+                              "type": "number"
+                            },
+                            "geometry_stable": {
+                              "type": "boolean"
+                            }
+                          }
+                        },
+                        {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "required": [
+                            "event_id",
+                            "seq",
+                            "elapsed_ms",
+                            "segment_id",
+                            "viewport",
+                            "type",
+                            "element_id",
+                            "qualified_ms",
+                            "threshold",
+                            "first_qualified"
+                          ],
+                          "properties": {
+                            "event_id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "seq": {
+                              "minimum": 0,
+                              "maximum": 20000,
+                              "type": "integer"
+                            },
+                            "elapsed_ms": {
+                              "minimum": 0,
+                              "maximum": 86400000,
+                              "type": "number"
+                            },
+                            "segment_id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "viewport": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "required": [
+                                "width",
+                                "height",
+                                "dpr",
+                                "visual_scale",
+                                "visual_offset_x",
+                                "visual_offset_y",
+                                "scroll_x",
+                                "scroll_y",
+                                "document_width",
+                                "document_height"
+                              ],
+                              "properties": {
+                                "width": {
+                                  "minimum": 240,
+                                  "maximum": 7680,
+                                  "type": "integer"
+                                },
+                                "height": {
+                                  "minimum": 200,
+                                  "maximum": 4320,
+                                  "type": "integer"
+                                },
+                                "dpr": {
+                                  "minimum": 0.5,
+                                  "maximum": 8,
+                                  "type": "number"
+                                },
+                                "visual_scale": {
+                                  "minimum": 0.25,
+                                  "maximum": 8,
+                                  "type": "number"
+                                },
+                                "visual_offset_x": {
+                                  "minimum": -10000,
+                                  "maximum": 10000,
+                                  "type": "number"
+                                },
+                                "visual_offset_y": {
+                                  "minimum": -10000,
+                                  "maximum": 10000,
+                                  "type": "number"
+                                },
+                                "scroll_x": {
+                                  "minimum": 0,
+                                  "maximum": 100000,
+                                  "type": "number"
+                                },
+                                "scroll_y": {
+                                  "minimum": 0,
+                                  "maximum": 100000,
+                                  "type": "number"
+                                },
+                                "document_width": {
+                                  "minimum": 240,
+                                  "maximum": 100000,
+                                  "type": "integer"
+                                },
+                                "document_height": {
+                                  "minimum": 200,
+                                  "maximum": 100000,
+                                  "type": "integer"
+                                }
+                              }
+                            },
+                            "type": {
+                              "const": "exposure",
+                              "type": "string"
+                            },
+                            "element_id": {
+                              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                              "maxLength": 64,
+                              "type": "string"
+                            },
+                            "qualified_ms": {
+                              "minimum": 1000,
+                              "maximum": 86400000,
+                              "type": "number"
+                            },
+                            "threshold": {
+                              "const": 0.5,
+                              "type": "number"
+                            },
+                            "first_qualified": {
+                              "type": "boolean"
+                            }
+                          }
+                        },
+                        {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "required": [
+                            "event_id",
+                            "seq",
+                            "elapsed_ms",
+                            "segment_id",
+                            "viewport",
+                            "type",
+                            "kind",
+                            "related_event_id"
+                          ],
+                          "properties": {
+                            "event_id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "seq": {
+                              "minimum": 0,
+                              "maximum": 20000,
+                              "type": "integer"
+                            },
+                            "elapsed_ms": {
+                              "minimum": 0,
+                              "maximum": 86400000,
+                              "type": "number"
+                            },
+                            "segment_id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "viewport": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "required": [
+                                "width",
+                                "height",
+                                "dpr",
+                                "visual_scale",
+                                "visual_offset_x",
+                                "visual_offset_y",
+                                "scroll_x",
+                                "scroll_y",
+                                "document_width",
+                                "document_height"
+                              ],
+                              "properties": {
+                                "width": {
+                                  "minimum": 240,
+                                  "maximum": 7680,
+                                  "type": "integer"
+                                },
+                                "height": {
+                                  "minimum": 200,
+                                  "maximum": 4320,
+                                  "type": "integer"
+                                },
+                                "dpr": {
+                                  "minimum": 0.5,
+                                  "maximum": 8,
+                                  "type": "number"
+                                },
+                                "visual_scale": {
+                                  "minimum": 0.25,
+                                  "maximum": 8,
+                                  "type": "number"
+                                },
+                                "visual_offset_x": {
+                                  "minimum": -10000,
+                                  "maximum": 10000,
+                                  "type": "number"
+                                },
+                                "visual_offset_y": {
+                                  "minimum": -10000,
+                                  "maximum": 10000,
+                                  "type": "number"
+                                },
+                                "scroll_x": {
+                                  "minimum": 0,
+                                  "maximum": 100000,
+                                  "type": "number"
+                                },
+                                "scroll_y": {
+                                  "minimum": 0,
+                                  "maximum": 100000,
+                                  "type": "number"
+                                },
+                                "document_width": {
+                                  "minimum": 240,
+                                  "maximum": 100000,
+                                  "type": "integer"
+                                },
+                                "document_height": {
+                                  "minimum": 200,
+                                  "maximum": 100000,
+                                  "type": "integer"
+                                }
+                              }
+                            },
+                            "type": {
+                              "const": "diagnostic",
+                              "type": "string"
+                            },
+                            "kind": {
+                              "const": "dead_click",
+                              "type": "string"
+                            },
+                            "related_event_id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "element_id": {
+                              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                              "maxLength": 64,
+                              "type": "string"
+                            }
+                          }
+                        },
+                        {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "required": [
+                            "event_id",
+                            "seq",
+                            "elapsed_ms",
+                            "segment_id",
+                            "viewport",
+                            "type",
+                            "kind",
+                            "code"
+                          ],
+                          "properties": {
+                            "event_id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "seq": {
+                              "minimum": 0,
+                              "maximum": 20000,
+                              "type": "integer"
+                            },
+                            "elapsed_ms": {
+                              "minimum": 0,
+                              "maximum": 86400000,
+                              "type": "number"
+                            },
+                            "segment_id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "viewport": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "required": [
+                                "width",
+                                "height",
+                                "dpr",
+                                "visual_scale",
+                                "visual_offset_x",
+                                "visual_offset_y",
+                                "scroll_x",
+                                "scroll_y",
+                                "document_width",
+                                "document_height"
+                              ],
+                              "properties": {
+                                "width": {
+                                  "minimum": 240,
+                                  "maximum": 7680,
+                                  "type": "integer"
+                                },
+                                "height": {
+                                  "minimum": 200,
+                                  "maximum": 4320,
+                                  "type": "integer"
+                                },
+                                "dpr": {
+                                  "minimum": 0.5,
+                                  "maximum": 8,
+                                  "type": "number"
+                                },
+                                "visual_scale": {
+                                  "minimum": 0.25,
+                                  "maximum": 8,
+                                  "type": "number"
+                                },
+                                "visual_offset_x": {
+                                  "minimum": -10000,
+                                  "maximum": 10000,
+                                  "type": "number"
+                                },
+                                "visual_offset_y": {
+                                  "minimum": -10000,
+                                  "maximum": 10000,
+                                  "type": "number"
+                                },
+                                "scroll_x": {
+                                  "minimum": 0,
+                                  "maximum": 100000,
+                                  "type": "number"
+                                },
+                                "scroll_y": {
+                                  "minimum": 0,
+                                  "maximum": 100000,
+                                  "type": "number"
+                                },
+                                "document_width": {
+                                  "minimum": 240,
+                                  "maximum": 100000,
+                                  "type": "integer"
+                                },
+                                "document_height": {
+                                  "minimum": 200,
+                                  "maximum": 100000,
+                                  "type": "integer"
+                                }
+                              }
+                            },
+                            "type": {
+                              "const": "diagnostic",
+                              "type": "string"
+                            },
+                            "kind": {
+                              "anyOf": [
+                                {
+                                  "const": "runtime_error",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "unhandled_rejection",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "code": {
+                              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                              "maxLength": 64,
+                              "type": "string"
+                            }
+                          }
+                        },
+                        {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "required": [
+                            "event_id",
+                            "seq",
+                            "elapsed_ms",
+                            "segment_id",
+                            "viewport",
+                            "type",
+                            "metric",
+                            "value"
+                          ],
+                          "properties": {
+                            "event_id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "seq": {
+                              "minimum": 0,
+                              "maximum": 20000,
+                              "type": "integer"
+                            },
+                            "elapsed_ms": {
+                              "minimum": 0,
+                              "maximum": 86400000,
+                              "type": "number"
+                            },
+                            "segment_id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "viewport": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "required": [
+                                "width",
+                                "height",
+                                "dpr",
+                                "visual_scale",
+                                "visual_offset_x",
+                                "visual_offset_y",
+                                "scroll_x",
+                                "scroll_y",
+                                "document_width",
+                                "document_height"
+                              ],
+                              "properties": {
+                                "width": {
+                                  "minimum": 240,
+                                  "maximum": 7680,
+                                  "type": "integer"
+                                },
+                                "height": {
+                                  "minimum": 200,
+                                  "maximum": 4320,
+                                  "type": "integer"
+                                },
+                                "dpr": {
+                                  "minimum": 0.5,
+                                  "maximum": 8,
+                                  "type": "number"
+                                },
+                                "visual_scale": {
+                                  "minimum": 0.25,
+                                  "maximum": 8,
+                                  "type": "number"
+                                },
+                                "visual_offset_x": {
+                                  "minimum": -10000,
+                                  "maximum": 10000,
+                                  "type": "number"
+                                },
+                                "visual_offset_y": {
+                                  "minimum": -10000,
+                                  "maximum": 10000,
+                                  "type": "number"
+                                },
+                                "scroll_x": {
+                                  "minimum": 0,
+                                  "maximum": 100000,
+                                  "type": "number"
+                                },
+                                "scroll_y": {
+                                  "minimum": 0,
+                                  "maximum": 100000,
+                                  "type": "number"
+                                },
+                                "document_width": {
+                                  "minimum": 240,
+                                  "maximum": 100000,
+                                  "type": "integer"
+                                },
+                                "document_height": {
+                                  "minimum": 200,
+                                  "maximum": 100000,
+                                  "type": "integer"
+                                }
+                              }
+                            },
+                            "type": {
+                              "const": "performance",
+                              "type": "string"
+                            },
+                            "metric": {
+                              "anyOf": [
+                                {
+                                  "const": "navigation_load_ms",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "fcp_ms",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "lcp_ms",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "interaction_latency_ms",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "layout_shift",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "value": {
+                              "minimum": 0,
+                              "maximum": 120000,
+                              "type": "number"
+                            }
+                          }
+                        },
+                        {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "required": [
+                            "event_id",
+                            "seq",
+                            "elapsed_ms",
+                            "segment_id",
+                            "viewport",
+                            "type",
+                            "retry_attempts",
+                            "dropped_events",
+                            "transport_failures"
+                          ],
+                          "properties": {
+                            "event_id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "seq": {
+                              "minimum": 0,
+                              "maximum": 20000,
+                              "type": "integer"
+                            },
+                            "elapsed_ms": {
+                              "minimum": 0,
+                              "maximum": 86400000,
+                              "type": "number"
+                            },
+                            "segment_id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "viewport": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "required": [
+                                "width",
+                                "height",
+                                "dpr",
+                                "visual_scale",
+                                "visual_offset_x",
+                                "visual_offset_y",
+                                "scroll_x",
+                                "scroll_y",
+                                "document_width",
+                                "document_height"
+                              ],
+                              "properties": {
+                                "width": {
+                                  "minimum": 240,
+                                  "maximum": 7680,
+                                  "type": "integer"
+                                },
+                                "height": {
+                                  "minimum": 200,
+                                  "maximum": 4320,
+                                  "type": "integer"
+                                },
+                                "dpr": {
+                                  "minimum": 0.5,
+                                  "maximum": 8,
+                                  "type": "number"
+                                },
+                                "visual_scale": {
+                                  "minimum": 0.25,
+                                  "maximum": 8,
+                                  "type": "number"
+                                },
+                                "visual_offset_x": {
+                                  "minimum": -10000,
+                                  "maximum": 10000,
+                                  "type": "number"
+                                },
+                                "visual_offset_y": {
+                                  "minimum": -10000,
+                                  "maximum": 10000,
+                                  "type": "number"
+                                },
+                                "scroll_x": {
+                                  "minimum": 0,
+                                  "maximum": 100000,
+                                  "type": "number"
+                                },
+                                "scroll_y": {
+                                  "minimum": 0,
+                                  "maximum": 100000,
+                                  "type": "number"
+                                },
+                                "document_width": {
+                                  "minimum": 240,
+                                  "maximum": 100000,
+                                  "type": "integer"
+                                },
+                                "document_height": {
+                                  "minimum": 200,
+                                  "maximum": 100000,
+                                  "type": "integer"
+                                }
+                              }
+                            },
+                            "type": {
+                              "const": "delivery",
+                              "type": "string"
+                            },
+                            "retry_attempts": {
+                              "minimum": 0,
+                              "maximum": 20000,
+                              "type": "integer"
+                            },
+                            "dropped_events": {
+                              "minimum": 0,
+                              "maximum": 20000,
+                              "type": "integer"
+                            },
+                            "transport_failures": {
+                              "minimum": 0,
+                              "maximum": 20000,
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        }
+      },
+      "options": {
+        "summary": "Explicit noncredentialed browser CORS preflight",
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        }
+      }
+    },
+    "/v2/config/{siteKey}": {
+      "get": {
+        "summary": "Selector-aware public configuration for exact approved Origin",
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        },
+        "parameters": [
+          {
+            "name": "siteKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/v1/config/{siteKey}": {
+      "get": {
+        "summary": "Legacy clients always receive upgrade-required disabled policy",
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        },
+        "parameters": [
+          {
+            "name": "siteKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/sdk/v1/{immutableArtifact}": {
+      "get": {
+        "summary": "Public immutable integrity-addressed JavaScript",
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        },
+        "parameters": [
+          {
+            "name": "immutableArtifact",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/healthz": {
+      "get": {
+        "summary": "Generic collector availability",
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        }
+      }
+    },
+    "/api/auth/csrf": {
+      "get": {
+        "summary": "Issue login CSRF cookie/token or read current session CSRF",
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "summary": "CSRF-protected local Argon2id login",
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        }
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "summary": "Immediately revoke session",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        }
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "summary": "Current server-authenticated identity",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        }
+      }
+    },
+    "/api/bootstrap": {
+      "get": {
+        "summary": "Authorized sites, selected pages and local policy",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        }
+      }
+    },
+    "/api/reports": {
+      "get": {
+        "summary": "Single-site/page UTC-date/device/viewport aggregate report",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        },
+        "parameters": [
+          {
+            "name": "site_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+              "maxLength": 64,
+              "type": "string"
+            }
+          },
+          {
+            "name": "page_key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+              "maxLength": 64,
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "device",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "all",
+                  "type": "string"
+                },
+                {
+                  "const": "mobile",
+                  "type": "string"
+                },
+                {
+                  "const": "tablet",
+                  "type": "string"
+                },
+                {
+                  "const": "desktop",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "width",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^[0-9]{3,4}$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "revision",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+              "maxLength": 64,
+              "type": "string"
+            }
+          },
+          {
+            "name": "reference_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "data_source",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "recorded",
+                  "type": "string"
+                },
+                {
+                  "const": "seeded",
+                  "type": "string"
+                },
+                {
+                  "const": "legacy",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "campaign",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+              "maxLength": 64,
+              "type": "string"
+            }
+          },
+          {
+            "name": "mapping",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "document",
+                  "type": "string"
+                },
+                {
+                  "const": "element",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "variant",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+              "maxLength": 64,
+              "type": "string"
+            }
+          },
+          {
+            "name": "experiment_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "market",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+              "maxLength": 64,
+              "type": "string"
+            }
+          },
+          {
+            "name": "product",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+              "maxLength": 64,
+              "type": "string"
+            }
+          },
+          {
+            "name": "brand",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+              "maxLength": 64,
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/landing-pages": {
+      "post": {
+        "summary": "Save an exact-selector disabled draft",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        }
+      }
+    },
+    "/api/pages/{site}/{page}/toggle": {
+      "post": {
+        "summary": "Pause a page or resume synthetic-only collection",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        },
+        "parameters": [
+          {
+            "name": "site",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/install": {
+      "get": {
+        "summary": "Selected-page manifest, SDK/SRI, draft/live gate and host bridge",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        },
+        "parameters": [
+          {
+            "name": "site_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+              "maxLength": 64,
+              "type": "string"
+            }
+          },
+          {
+            "name": "page_key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+              "maxLength": 64,
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/references/import": {
+      "post": {
+        "summary": "Bounded validated PNG/WebP and layout manifest import",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        }
+      }
+    },
+    "/api/references/{id}/approve": {
+      "post": {
+        "summary": "Review/approve a scoped reference",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/references/{id}/image": {
+      "get": {
+        "summary": "Authenticated private reference PNG",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/export.csv": {
+      "get": {
+        "summary": "Authorized aggregate CSV export with formula-neutralized text",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        },
+        "parameters": [
+          {
+            "name": "site_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+              "maxLength": 64,
+              "type": "string"
+            }
+          },
+          {
+            "name": "page_key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+              "maxLength": 64,
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "device",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "all",
+                  "type": "string"
+                },
+                {
+                  "const": "mobile",
+                  "type": "string"
+                },
+                {
+                  "const": "tablet",
+                  "type": "string"
+                },
+                {
+                  "const": "desktop",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "width",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^[0-9]{3,4}$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "revision",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+              "maxLength": 64,
+              "type": "string"
+            }
+          },
+          {
+            "name": "reference_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "data_source",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "recorded",
+                  "type": "string"
+                },
+                {
+                  "const": "seeded",
+                  "type": "string"
+                },
+                {
+                  "const": "legacy",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "campaign",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+              "maxLength": 64,
+              "type": "string"
+            }
+          },
+          {
+            "name": "mapping",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "document",
+                  "type": "string"
+                },
+                {
+                  "const": "element",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "variant",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+              "maxLength": 64,
+              "type": "string"
+            }
+          },
+          {
+            "name": "experiment_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "market",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+              "maxLength": 64,
+              "type": "string"
+            }
+          },
+          {
+            "name": "product",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+              "maxLength": 64,
+              "type": "string"
+            }
+          },
+          {
+            "name": "brand",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+              "maxLength": 64,
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/settings/privacy": {
+      "patch": {
+        "summary": "Owner-only retention, reporting threshold and global stop",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        }
+      }
+    },
+    "/api/quality": {
+      "get": {
+        "summary": "Owner-only process counters and durable queue health",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        }
+      }
+    },
+    "/api/audit": {
+      "get": {
+        "summary": "Owner-only recent non-personal configuration audit",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        }
+      }
+    },
+    "/api/pages/{site}/{page}/capture": {
+      "post": {
+        "summary": "Queue a fixed synthetic fixture capture; returns 202, pending explicit screenshot review",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        },
+        "parameters": [
+          {
+            "name": "site",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/captures/{id}": {
+      "get": {
+        "summary": "Read scoped durable capture status",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/installations": {
+      "get": {
+        "summary": "Membership-scoped saved link/pixel inspection and live 24h recorded-event status; registry entries are not installations",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        }
+      }
+    },
+    "/api/pages/{site}/{page}/check-installation": {
+      "post": {
+        "summary": "Inspect an exact registered URL and bounded same-origin scripts; no JavaScript execution or consent; public HTTPS only outside the configured local demo",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        },
+        "parameters": [
+          {
+            "name": "site",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/campaigns": {
+      "get": {
+        "summary": "Membership-scoped portfolio counts, ordered CTA funnels and investigation rules",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        },
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "device",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "all",
+                  "type": "string"
+                },
+                {
+                  "const": "mobile",
+                  "type": "string"
+                },
+                {
+                  "const": "tablet",
+                  "type": "string"
+                },
+                {
+                  "const": "desktop",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "data_source",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "recorded",
+                  "type": "string"
+                },
+                {
+                  "const": "seeded",
+                  "type": "string"
+                },
+                {
+                  "const": "legacy",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "campaign",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+              "maxLength": 64,
+              "type": "string"
+            }
+          },
+          {
+            "name": "variant",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+              "maxLength": 64,
+              "type": "string"
+            }
+          },
+          {
+            "name": "market",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+              "maxLength": 64,
+              "type": "string"
+            }
+          },
+          {
+            "name": "product",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+              "maxLength": 64,
+              "type": "string"
+            }
+          },
+          {
+            "name": "brand",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+              "maxLength": 64,
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/reports/versions": {
+      "get": {
+        "summary": "Independent revision_a and revision_b reports; each keeps its own cohort and reference",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        },
+        "parameters": [
+          {
+            "name": "site_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+              "maxLength": 64,
+              "type": "string"
+            }
+          },
+          {
+            "name": "page_key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+              "maxLength": 64,
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "device",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "all",
+                  "type": "string"
+                },
+                {
+                  "const": "mobile",
+                  "type": "string"
+                },
+                {
+                  "const": "tablet",
+                  "type": "string"
+                },
+                {
+                  "const": "desktop",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "width",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^[0-9]{3,4}$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "revision",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+              "maxLength": 64,
+              "type": "string"
+            }
+          },
+          {
+            "name": "reference_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "data_source",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "recorded",
+                  "type": "string"
+                },
+                {
+                  "const": "seeded",
+                  "type": "string"
+                },
+                {
+                  "const": "legacy",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "campaign",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+              "maxLength": 64,
+              "type": "string"
+            }
+          },
+          {
+            "name": "mapping",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "document",
+                  "type": "string"
+                },
+                {
+                  "const": "element",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "variant",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+              "maxLength": 64,
+              "type": "string"
+            }
+          },
+          {
+            "name": "experiment_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "market",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+              "maxLength": 64,
+              "type": "string"
+            }
+          },
+          {
+            "name": "product",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+              "maxLength": 64,
+              "type": "string"
+            }
+          },
+          {
+            "name": "brand",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+              "maxLength": 64,
+              "type": "string"
+            }
+          },
+          {
+            "name": "revision_a",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$"
+            }
+          },
+          {
+            "name": "revision_b",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$"
+            }
+          }
+        ]
+      }
+    },
+    "/api/pages/{site}/{page}/policy": {
+      "patch": {
+        "summary": "Owner/administrator registered campaign, primary CTA/action and diagnostic policy",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                  "campaign_codes",
+                  "diagnostics_enabled",
+                  "diagnostic_error_codes",
+                  "primary_cta_id",
+                  "primary_action_id"
+                ],
+                "properties": {
+                  "revision": {
+                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                    "maxLength": 64,
+                    "type": "string"
+                  },
+                  "campaign_codes": {
+                    "minItems": 1,
+                    "maxItems": 32,
+                    "uniqueItems": true,
+                    "type": "array",
+                    "items": {
+                      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                      "maxLength": 64,
+                      "type": "string"
+                    }
+                  },
+                  "diagnostics_enabled": {
+                    "type": "boolean"
+                  },
+                  "diagnostic_error_codes": {
+                    "maxItems": 16,
+                    "uniqueItems": true,
+                    "type": "array",
+                    "items": {
+                      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                      "maxLength": 64,
+                      "type": "string"
+                    }
+                  },
+                  "primary_cta_id": {
+                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                    "maxLength": 64,
+                    "type": "string"
+                  },
+                  "primary_action_id": {
+                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                    "maxLength": 64,
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        },
+        "parameters": [
+          {
+            "name": "site",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/operations": {
+      "get": {
+        "summary": "Owner-only maintenance settings, queue, durable runs/alerts and aggregate telemetry",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        }
+      }
+    },
+    "/api/tables/audit": {
+      "get": {
+        "summary": "Owner-only paginated audit history with validated sort/search and stable snapshot",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        },
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^(0|[1-9][0-9]{0,5})$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "5",
+                  "type": "string"
+                },
+                {
+                  "const": "10",
+                  "type": "string"
+                },
+                {
+                  "const": "25",
+                  "type": "string"
+                },
+                {
+                  "const": "50",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "created_at",
+                  "type": "string"
+                },
+                {
+                  "const": "action",
+                  "type": "string"
+                },
+                {
+                  "const": "site_id",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "asc",
+                  "type": "string"
+                },
+                {
+                  "const": "desc",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "maxLength": 120,
+              "pattern": "^[^\\u0000-\\u001f\\u007f]*$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "as_of",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "maxLength": 30,
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/tables/operations": {
+      "get": {
+        "summary": "Owner-only paginated operations history with validated sort/search and stable snapshot",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        },
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^(0|[1-9][0-9]{0,5})$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "5",
+                  "type": "string"
+                },
+                {
+                  "const": "10",
+                  "type": "string"
+                },
+                {
+                  "const": "25",
+                  "type": "string"
+                },
+                {
+                  "const": "50",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "started_at",
+                  "type": "string"
+                },
+                {
+                  "const": "finished_at",
+                  "type": "string"
+                },
+                {
+                  "const": "kind",
+                  "type": "string"
+                },
+                {
+                  "const": "status",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "asc",
+                  "type": "string"
+                },
+                {
+                  "const": "desc",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "maxLength": 120,
+              "pattern": "^[^\\u0000-\\u001f\\u007f]*$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "as_of",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "maxLength": 30,
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/operations/settings": {
+      "patch": {
+        "summary": "Owner-only maintenance schedule and alert thresholds",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                  "automatic_retention",
+                  "retention_hour_utc",
+                  "automatic_backup",
+                  "backup_hour_utc",
+                  "backup_days",
+                  "queue_warning_seconds",
+                  "rejection_warning_percent"
+                ],
+                "properties": {
+                  "automatic_retention": {
+                    "type": "boolean"
+                  },
+                  "retention_hour_utc": {
+                    "minimum": 0,
+                    "maximum": 23,
+                    "type": "integer"
+                  },
+                  "automatic_backup": {
+                    "type": "boolean"
+                  },
+                  "backup_hour_utc": {
+                    "minimum": 0,
+                    "maximum": 23,
+                    "type": "integer"
+                  },
+                  "backup_days": {
+                    "minimum": 1,
+                    "maximum": 90,
+                    "type": "integer"
+                  },
+                  "queue_warning_seconds": {
+                    "minimum": 10,
+                    "maximum": 3600,
+                    "type": "integer"
+                  },
+                  "rejection_warning_percent": {
+                    "minimum": 1,
+                    "maximum": 100,
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        }
+      }
+    },
+    "/api/operations/run/{kind}": {
+      "post": {
+        "summary": "Owner-only retention, verified backup or monitor run; no concurrent backup/retention",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        },
+        "parameters": [
+          {
+            "name": "kind",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/registry/import": {
+      "post": {
+        "summary": "Transactional exact-lp registry validation/dry-run/import; real pages remain disabled",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                  "dry_run",
+                  "rows"
+                ],
+                "properties": {
+                  "dry_run": {
+                    "type": "boolean"
+                  },
+                  "rows": {
+                    "minItems": 1,
+                    "maxItems": 100,
+                    "type": "array",
+                    "items": {
+                      "additionalProperties": false,
+                      "type": "object",
+                      "required": [
+                        "name",
+                        "page_key",
+                        "url",
+                        "market",
+                        "product",
+                        "brand",
+                        "locale",
+                        "currency",
+                        "report_timezone",
+                        "page_family",
+                        "acquisition_goal"
+                      ],
+                      "properties": {
+                        "name": {
+                          "minLength": 1,
+                          "maxLength": 120,
+                          "pattern": "^[^\\u0000-\\u001f\\u007f]+$",
+                          "type": "string"
+                        },
+                        "page_key": {
+                          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                          "maxLength": 64,
+                          "type": "string"
+                        },
+                        "url": {
+                          "minLength": 8,
+                          "maxLength": 2048,
+                          "type": "string"
+                        },
+                        "market": {
+                          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                          "maxLength": 64,
+                          "type": "string"
+                        },
+                        "product": {
+                          "anyOf": [
+                            {
+                              "const": "casino",
+                              "type": "string"
+                            },
+                            {
+                              "const": "sport",
+                              "type": "string"
+                            },
+                            {
+                              "const": "campaign",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "brand": {
+                          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                          "maxLength": 64,
+                          "type": "string"
+                        },
+                        "locale": {
+                          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                          "maxLength": 64,
+                          "type": "string"
+                        },
+                        "currency": {
+                          "pattern": "^[A-Z]{3}$",
+                          "type": "string"
+                        },
+                        "report_timezone": {
+                          "minLength": 1,
+                          "maxLength": 64,
+                          "type": "string"
+                        },
+                        "page_family": {
+                          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                          "maxLength": 64,
+                          "type": "string"
+                        },
+                        "acquisition_goal": {
+                          "anyOf": [
+                            {
+                              "const": "registration_completed",
+                              "type": "string"
+                            },
+                            {
+                              "const": "qualified_acquisition",
+                              "type": "string"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        }
+      }
+    },
+    "/api/registry/export": {
+      "get": {
+        "summary": "Authorized page registry JSON without integration secrets",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        }
+      }
+    },
+    "/api/acquisition": {
+      "get": {
+        "summary": "Membership-scoped backend acquisition ledger; UTC entry dates; currencies kept separate",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        },
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "site_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+              "maxLength": 64,
+              "type": "string"
+            }
+          },
+          {
+            "name": "page_key",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+              "maxLength": 64,
+              "type": "string"
+            }
+          },
+          {
+            "name": "market",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+              "maxLength": 64,
+              "type": "string"
+            }
+          },
+          {
+            "name": "product",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+              "maxLength": 64,
+              "type": "string"
+            }
+          },
+          {
+            "name": "brand",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+              "maxLength": 64,
+              "type": "string"
+            }
+          },
+          {
+            "name": "campaign",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+              "maxLength": 64,
+              "type": "string"
+            }
+          },
+          {
+            "name": "device",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "all",
+                  "type": "string"
+                },
+                {
+                  "const": "desktop",
+                  "type": "string"
+                },
+                {
+                  "const": "tablet",
+                  "type": "string"
+                },
+                {
+                  "const": "mobile",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "data_source",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "recorded",
+                  "type": "string"
+                },
+                {
+                  "const": "seeded",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/api/acquisition/spend": {
+      "post": {
+        "summary": "Reconcile one page/campaign/day spend total with explicit outcome-coverage confirmation",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                  "site_id",
+                  "page_key",
+                  "campaign",
+                  "day",
+                  "currency",
+                  "amount_micros",
+                  "coverage_confirmed"
+                ],
+                "properties": {
+                  "site_id": {
+                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                    "maxLength": 64,
+                    "type": "string"
+                  },
+                  "page_key": {
+                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                    "maxLength": 64,
+                    "type": "string"
+                  },
+                  "campaign": {
+                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                    "maxLength": 64,
+                    "type": "string"
+                  },
+                  "day": {
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                    "type": "string"
+                  },
+                  "currency": {
+                    "pattern": "^[A-Z]{3}$",
+                    "type": "string"
+                  },
+                  "amount_micros": {
+                    "minimum": 0,
+                    "maximum": 10000000000000,
+                    "type": "integer"
+                  },
+                  "coverage_confirmed": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        }
+      }
+    },
+    "/api/experiments": {
+      "get": {
+        "summary": "Authorized experiment portfolio without assignment salts or unit tokens",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        }
+      },
+      "post": {
+        "summary": "Freeze a draft binary-outcome power plan and page context",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                  "site_id",
+                  "page_key",
+                  "name",
+                  "kind",
+                  "primary_metric",
+                  "control_variant",
+                  "treatment_variant",
+                  "baseline_rate",
+                  "mde_relative",
+                  "minimum_days",
+                  "attribution_hours"
+                ],
+                "properties": {
+                  "site_id": {
+                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                    "maxLength": 64,
+                    "type": "string"
+                  },
+                  "page_key": {
+                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                    "maxLength": 64,
+                    "type": "string"
+                  },
+                  "name": {
+                    "minLength": 1,
+                    "maxLength": 120,
+                    "pattern": "^[^\\u0000-\\u001f\\u007f]+$",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "anyOf": [
+                      {
+                        "const": "aa",
+                        "type": "string"
+                      },
+                      {
+                        "const": "ab",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "primary_metric": {
+                    "anyOf": [
+                      {
+                        "const": "registration_completed",
+                        "type": "string"
+                      },
+                      {
+                        "const": "qualified_acquisition",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "control_variant": {
+                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                    "maxLength": 64,
+                    "type": "string"
+                  },
+                  "treatment_variant": {
+                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                    "maxLength": 64,
+                    "type": "string"
+                  },
+                  "baseline_rate": {
+                    "exclusiveMinimum": 0,
+                    "exclusiveMaximum": 1,
+                    "type": "number"
+                  },
+                  "mde_relative": {
+                    "exclusiveMinimum": 0,
+                    "maximum": 1,
+                    "type": "number"
+                  },
+                  "minimum_days": {
+                    "minimum": 1,
+                    "maximum": 90,
+                    "type": "integer"
+                  },
+                  "attribution_hours": {
+                    "minimum": 1,
+                    "maximum": 720,
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        }
+      }
+    },
+    "/api/experiments/{id}/state": {
+      "post": {
+        "summary": "Start/pause/resume or permanently close assignment; real-site starts remain disabled",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                  "status"
+                ],
+                "properties": {
+                  "status": {
+                    "anyOf": [
+                      {
+                        "const": "running",
+                        "type": "string"
+                      },
+                      {
+                        "const": "paused",
+                        "type": "string"
+                      },
+                      {
+                        "const": "completed",
+                        "type": "string"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/experiments/{id}/readout": {
+      "get": {
+        "summary": "Fixed-horizon matured intent-to-treat readout; integrity blockers, diagnostics and archived aggregates",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/experiments/{id}/freeze": {
+      "post": {
+        "summary": "Freeze a valid completed readout; subsequent new outcomes are rejected",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/experiments/{id}/sample": {
+      "post": {
+        "summary": "Generate source-separated historical examples on a running synthetic fixture only",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/sites/{site}/acquisition-keys": {
+      "get": {
+        "summary": "Authorized metadata for site-scoped backend keys; secrets never returned",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        },
+        "parameters": [
+          {
+            "name": "site",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "post": {
+        "summary": "Create a revocable site-scoped backend secret; shown once",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        },
+        "parameters": [
+          {
+            "name": "site",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/acquisition-keys/{id}/revoke": {
+      "post": {
+        "summary": "Revoke a scoped backend integration key",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/v1/acquisition/visits": {
+      "post": {
+        "summary": "Register a consented acquisition visit; optionally issue a stable 50/50 experiment assignment",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                  "receipt_id",
+                  "page_key",
+                  "unit_token",
+                  "campaign",
+                  "device",
+                  "analytics_consent",
+                  "public_context",
+                  "policy_version"
+                ],
+                "properties": {
+                  "receipt_id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "page_key": {
+                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                    "maxLength": 64,
+                    "type": "string"
+                  },
+                  "unit_token": {
+                    "pattern": "^[A-Za-z0-9_-]{32,128}$",
+                    "type": "string"
+                  },
+                  "campaign": {
+                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                    "maxLength": 64,
+                    "type": "string"
+                  },
+                  "device": {
+                    "anyOf": [
+                      {
+                        "const": "desktop",
+                        "type": "string"
+                      },
+                      {
+                        "const": "tablet",
+                        "type": "string"
+                      },
+                      {
+                        "const": "mobile",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "analytics_consent": {
+                    "const": true,
+                    "type": "boolean"
+                  },
+                  "public_context": {
+                    "const": true,
+                    "type": "boolean"
+                  },
+                  "policy_version": {
+                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                    "maxLength": 64,
+                    "type": "string"
+                  },
+                  "experiment_id": {
+                    "format": "uuid",
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        },
+        "security": [
+          {
+            "acquisitionKey": []
+          }
+        ]
+      }
+    },
+    "/v1/acquisition/rendered": {
+      "post": {
+        "summary": "Confirm the assigned variant actually rendered",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                  "visit_id",
+                  "variant",
+                  "revision"
+                ],
+                "properties": {
+                  "visit_id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "variant": {
+                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                    "maxLength": 64,
+                    "type": "string"
+                  },
+                  "revision": {
+                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                    "maxLength": 64,
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        },
+        "security": [
+          {
+            "acquisitionKey": []
+          }
+        ]
+      }
+    },
+    "/v1/acquisition/outcomes": {
+      "post": {
+        "summary": "Deduplicate backend-confirmed business completions within their attribution window",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                  "event_id",
+                  "visit_id",
+                  "kind",
+                  "occurred_at"
+                ],
+                "properties": {
+                  "event_id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "visit_id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "anyOf": [
+                      {
+                        "const": "registration_completed",
+                        "type": "string"
+                      },
+                      {
+                        "const": "qualified_acquisition",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "occurred_at": {
+                    "format": "date-time",
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        },
+        "security": [
+          {
+            "acquisitionKey": []
+          }
+        ]
+      }
+    },
+    "/v1/acquisition/withdraw": {
+      "post": {
+        "summary": "Withdraw the site-scoped unit and delete linked acquisition/raw usability evidence",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                  "visit_id"
+                ],
+                "properties": {
+                  "visit_id": {
+                    "format": "uuid",
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful JSON response (route-specific)"
+          },
+          "204": {
+            "description": "Durably accepted event batch or successful preflight"
+          },
+          "400": {
+            "description": "Strict schema / request validation failed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Origin / scope / consent policy / role rejected"
+          },
+          "409": {
+            "description": "Immutable context, selector or event receipt conflict"
+          },
+          "413": {
+            "description": "Request size limit"
+          },
+          "429": {
+            "description": "Rate / quota limit; Retry-After applies"
+          },
+          "503": {
+            "description": "Durable ingestion unavailable; no acceptance"
+          }
+        },
+        "security": [
+          {
+            "acquisitionKey": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "acquisitionKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Acquisition-Key",
+        "description": "Backend-only; browser Origin headers are rejected. Keys are site scoped and revocable."
+      },
+      "session": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "nb_session"
+      }
+    }
+  }
+}

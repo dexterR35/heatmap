@@ -1,0 +1,23 @@
+.table-sort { display: inline-flex; align-items: center; gap: 7px; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; letter-spacing: inherit; text-align: inherit; }
+.table-sort svg { color: #68756b; }
+.report-scope { display: flex; align-items: center; gap: 8px; color: #536257; font-size: 12px; padding: 0 0 20px; }
+.table-sort:hover { color: #171d18; }
+.table-pagination { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding: 13px 20px; border-top: 1px solid #e6eae7; color: #505e54; font: 400 11px/1.5 Inter,Arial,sans-serif; background: #fff; }
+.table-range { margin-right: auto; font-variant-numeric: tabular-nums; }
+.table-pagination label { display: inline-flex; align-items: center; gap: 7px; }
+.table-pagination select { min-width: 53px; min-height: 30px; border: 1px solid #d7ddd8; border-radius: 4px; padding: 3px 5px; color: #333d36; background: #fff; font-size: 11px; }
+.table-page { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.table-page-buttons { display: flex; gap: 4px; }
+.table-page-buttons button { display: grid; place-items: center; width: 29px; height: 29px; border: 1px solid #dce2dd; border-radius: 4px; background: #fff; color: #3c4b41; padding: 0; }
+.table-page-buttons button:hover:enabled { background: #f0f4f1; border-color: #a6b6aa; }
+.table-page-buttons button:disabled { opacity: .45; }
+.page-table td.table-empty { text-align: center; padding: 35px 20px; white-space: normal; font-size: 12px; color: #536257; }
+.table-error { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: #fff1ec; color: #963414; font-size: 12px; padding: 14px 20px; }
+.table-search { display: flex; align-items: center; gap: 9px; padding: 13px 20px; border-bottom: 1px solid #e6eae7; color: #5d6d62; }
+.table-search input { border: 0; background: transparent; flex: 1; min-width: 0; color: #29372e; font-size: 12px; padding: 7px 0; }
+.table-search input::placeholder { color: #637368; }
+.table-search .text-button { font-size: 11px; }
+.table-scroll:focus-visible { outline: 2px solid #a62b12; outline-offset: -3px; }
+.chart-data .table-pagination { margin: 0; }
+.campaign-table th:last-child .table-sort { display: none; }
+@media(max-width:767px){.table-pagination{gap:10px;padding:12px 16px;font-size:10px}.table-range{flex:1 0 45%}.table-pagination label{margin-left:auto}.table-page{margin-right:auto}.table-search{padding:12px 16px}.table-pagination .table-page-buttons{gap:5px}}

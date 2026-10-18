@@ -1,0 +1,9 @@
+{
+  "version": "0.3.0",
+  "private": true,
+  "type": "module",
+  "name": "@netbet/heatmap-collector",
+  "scripts": {
+    "start": "pnpm --dir ../.. start:collector"
+  }
+}

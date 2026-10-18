@@ -1,0 +1,25 @@
+{
+  "collection_mode": "selected_pages",
+  "origin": "https://go.netbet.ro",
+  "environment": "real",
+  "enabled": false,
+  "approval_state": "pending",
+  "market": null,
+  "pages": [{
+    "page_key": "casino-halloween",
+    "name": "Casino · Halloween",
+    "enabled": false,
+    "approval_state": "pending",
+    "revision": "UNKNOWN",
+    "integration_status": "UNKNOWN",
+    "selector": {
+      "origin": "https://go.netbet.ro",
+      "path": "/casino/",
+      "query_equals": {"lp": "halloween"},
+      "ignored_query_names": [],
+      "other_query_policy": "reject",
+      "duplicate_query_policy": "reject",
+      "fragment_policy": "ignore_anchor"
+    }
+  }]
+}

@@ -1,0 +1,1462 @@
+{
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "schema_version",
+    "sdk_version",
+    "site_key",
+    "batch_id",
+    "config_version",
+    "view_id",
+    "view_started_at",
+    "sample_rate",
+    "consent",
+    "context",
+    "events"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "type": "number"
+    },
+    "sdk_version": {
+      "maxLength": 32,
+      "type": "string"
+    },
+    "site_key": {
+      "pattern": "^site_[a-zA-Z0-9_-]{8,90}$",
+      "maxLength": 96,
+      "type": "string"
+    },
+    "batch_id": {
+      "format": "uuid",
+      "type": "string"
+    },
+    "config_version": {
+      "minimum": 1,
+      "type": "integer"
+    },
+    "view_id": {
+      "format": "uuid",
+      "type": "string"
+    },
+    "view_started_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "sample_rate": {
+      "minimum": 0.000001,
+      "maximum": 1,
+      "type": "number"
+    },
+    "consent": {
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "analytics",
+        "policy_version"
+      ],
+      "properties": {
+        "analytics": {
+          "const": true,
+          "type": "boolean"
+        },
+        "policy_version": {
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+          "maxLength": 64,
+          "type": "string"
+        }
+      }
+    },
+    "context": {
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "page_key",
+        "revision",
+        "locale",
+        "variant",
+        "state",
+        "campaign"
+      ],
+      "properties": {
+        "page_key": {
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+          "maxLength": 64,
+          "type": "string"
+        },
+        "revision": {
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+          "maxLength": 64,
+          "type": "string"
+        },
+        "locale": {
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+          "maxLength": 64,
+          "type": "string"
+        },
+        "variant": {
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+          "maxLength": 64,
+          "type": "string"
+        },
+        "state": {
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+          "maxLength": 64,
+          "type": "string"
+        },
+        "campaign": {
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+          "maxLength": 64,
+          "type": "string"
+        },
+        "acquisition_id": {
+          "format": "uuid",
+          "type": "string"
+        }
+      }
+    },
+    "events": {
+      "minItems": 1,
+      "maxItems": 50,
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "additionalProperties": false,
+            "type": "object",
+            "required": [
+              "event_id",
+              "seq",
+              "elapsed_ms",
+              "segment_id",
+              "viewport",
+              "type"
+            ],
+            "properties": {
+              "event_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "seq": {
+                "minimum": 0,
+                "maximum": 20000,
+                "type": "integer"
+              },
+              "elapsed_ms": {
+                "minimum": 0,
+                "maximum": 86400000,
+                "type": "number"
+              },
+              "segment_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "viewport": {
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                  "width",
+                  "height",
+                  "dpr",
+                  "visual_scale",
+                  "visual_offset_x",
+                  "visual_offset_y",
+                  "scroll_x",
+                  "scroll_y",
+                  "document_width",
+                  "document_height"
+                ],
+                "properties": {
+                  "width": {
+                    "minimum": 240,
+                    "maximum": 7680,
+                    "type": "integer"
+                  },
+                  "height": {
+                    "minimum": 200,
+                    "maximum": 4320,
+                    "type": "integer"
+                  },
+                  "dpr": {
+                    "minimum": 0.5,
+                    "maximum": 8,
+                    "type": "number"
+                  },
+                  "visual_scale": {
+                    "minimum": 0.25,
+                    "maximum": 8,
+                    "type": "number"
+                  },
+                  "visual_offset_x": {
+                    "minimum": -10000,
+                    "maximum": 10000,
+                    "type": "number"
+                  },
+                  "visual_offset_y": {
+                    "minimum": -10000,
+                    "maximum": 10000,
+                    "type": "number"
+                  },
+                  "scroll_x": {
+                    "minimum": 0,
+                    "maximum": 100000,
+                    "type": "number"
+                  },
+                  "scroll_y": {
+                    "minimum": 0,
+                    "maximum": 100000,
+                    "type": "number"
+                  },
+                  "document_width": {
+                    "minimum": 240,
+                    "maximum": 100000,
+                    "type": "integer"
+                  },
+                  "document_height": {
+                    "minimum": 200,
+                    "maximum": 100000,
+                    "type": "integer"
+                  }
+                }
+              },
+              "type": {
+                "const": "page_view",
+                "type": "string"
+              }
+            }
+          },
+          {
+            "additionalProperties": false,
+            "type": "object",
+            "required": [
+              "event_id",
+              "seq",
+              "elapsed_ms",
+              "segment_id",
+              "viewport",
+              "type",
+              "segment_ordinal",
+              "geometry_state"
+            ],
+            "properties": {
+              "event_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "seq": {
+                "minimum": 0,
+                "maximum": 20000,
+                "type": "integer"
+              },
+              "elapsed_ms": {
+                "minimum": 0,
+                "maximum": 86400000,
+                "type": "number"
+              },
+              "segment_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "viewport": {
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                  "width",
+                  "height",
+                  "dpr",
+                  "visual_scale",
+                  "visual_offset_x",
+                  "visual_offset_y",
+                  "scroll_x",
+                  "scroll_y",
+                  "document_width",
+                  "document_height"
+                ],
+                "properties": {
+                  "width": {
+                    "minimum": 240,
+                    "maximum": 7680,
+                    "type": "integer"
+                  },
+                  "height": {
+                    "minimum": 200,
+                    "maximum": 4320,
+                    "type": "integer"
+                  },
+                  "dpr": {
+                    "minimum": 0.5,
+                    "maximum": 8,
+                    "type": "number"
+                  },
+                  "visual_scale": {
+                    "minimum": 0.25,
+                    "maximum": 8,
+                    "type": "number"
+                  },
+                  "visual_offset_x": {
+                    "minimum": -10000,
+                    "maximum": 10000,
+                    "type": "number"
+                  },
+                  "visual_offset_y": {
+                    "minimum": -10000,
+                    "maximum": 10000,
+                    "type": "number"
+                  },
+                  "scroll_x": {
+                    "minimum": 0,
+                    "maximum": 100000,
+                    "type": "number"
+                  },
+                  "scroll_y": {
+                    "minimum": 0,
+                    "maximum": 100000,
+                    "type": "number"
+                  },
+                  "document_width": {
+                    "minimum": 240,
+                    "maximum": 100000,
+                    "type": "integer"
+                  },
+                  "document_height": {
+                    "minimum": 200,
+                    "maximum": 100000,
+                    "type": "integer"
+                  }
+                }
+              },
+              "type": {
+                "const": "segment_start",
+                "type": "string"
+              },
+              "segment_ordinal": {
+                "minimum": 0,
+                "maximum": 1000,
+                "type": "integer"
+              },
+              "geometry_state": {
+                "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                "maxLength": 64,
+                "type": "string"
+              }
+            }
+          },
+          {
+            "additionalProperties": false,
+            "type": "object",
+            "required": [
+              "event_id",
+              "seq",
+              "elapsed_ms",
+              "segment_id",
+              "viewport",
+              "type",
+              "client_x",
+              "client_y",
+              "document_x",
+              "document_y",
+              "pointer",
+              "layer"
+            ],
+            "properties": {
+              "event_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "seq": {
+                "minimum": 0,
+                "maximum": 20000,
+                "type": "integer"
+              },
+              "elapsed_ms": {
+                "minimum": 0,
+                "maximum": 86400000,
+                "type": "number"
+              },
+              "segment_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "viewport": {
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                  "width",
+                  "height",
+                  "dpr",
+                  "visual_scale",
+                  "visual_offset_x",
+                  "visual_offset_y",
+                  "scroll_x",
+                  "scroll_y",
+                  "document_width",
+                  "document_height"
+                ],
+                "properties": {
+                  "width": {
+                    "minimum": 240,
+                    "maximum": 7680,
+                    "type": "integer"
+                  },
+                  "height": {
+                    "minimum": 200,
+                    "maximum": 4320,
+                    "type": "integer"
+                  },
+                  "dpr": {
+                    "minimum": 0.5,
+                    "maximum": 8,
+                    "type": "number"
+                  },
+                  "visual_scale": {
+                    "minimum": 0.25,
+                    "maximum": 8,
+                    "type": "number"
+                  },
+                  "visual_offset_x": {
+                    "minimum": -10000,
+                    "maximum": 10000,
+                    "type": "number"
+                  },
+                  "visual_offset_y": {
+                    "minimum": -10000,
+                    "maximum": 10000,
+                    "type": "number"
+                  },
+                  "scroll_x": {
+                    "minimum": 0,
+                    "maximum": 100000,
+                    "type": "number"
+                  },
+                  "scroll_y": {
+                    "minimum": 0,
+                    "maximum": 100000,
+                    "type": "number"
+                  },
+                  "document_width": {
+                    "minimum": 240,
+                    "maximum": 100000,
+                    "type": "integer"
+                  },
+                  "document_height": {
+                    "minimum": 200,
+                    "maximum": 100000,
+                    "type": "integer"
+                  }
+                }
+              },
+              "type": {
+                "const": "click",
+                "type": "string"
+              },
+              "client_x": {
+                "minimum": 0,
+                "maximum": 100000,
+                "type": "number"
+              },
+              "client_y": {
+                "minimum": 0,
+                "maximum": 100000,
+                "type": "number"
+              },
+              "document_x": {
+                "minimum": 0,
+                "maximum": 100000,
+                "type": "number"
+              },
+              "document_y": {
+                "minimum": 0,
+                "maximum": 100000,
+                "type": "number"
+              },
+              "pointer": {
+                "anyOf": [
+                  {
+                    "const": "mouse",
+                    "type": "string"
+                  },
+                  {
+                    "const": "touch",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pen",
+                    "type": "string"
+                  }
+                ]
+              },
+              "layer": {
+                "anyOf": [
+                  {
+                    "const": "document",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fixed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "sticky",
+                    "type": "string"
+                  },
+                  {
+                    "const": "element-only",
+                    "type": "string"
+                  }
+                ]
+              },
+              "target": {
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                  "element_id",
+                  "x_fraction",
+                  "y_fraction",
+                  "rect"
+                ],
+                "properties": {
+                  "element_id": {
+                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                    "maxLength": 64,
+                    "type": "string"
+                  },
+                  "x_fraction": {
+                    "minimum": 0,
+                    "maximum": 1,
+                    "type": "number"
+                  },
+                  "y_fraction": {
+                    "minimum": 0,
+                    "maximum": 1,
+                    "type": "number"
+                  },
+                  "rect": {
+                    "additionalProperties": false,
+                    "type": "object",
+                    "required": [
+                      "x",
+                      "y",
+                      "width",
+                      "height"
+                    ],
+                    "properties": {
+                      "x": {
+                        "minimum": -10000,
+                        "maximum": 100000,
+                        "type": "number"
+                      },
+                      "y": {
+                        "minimum": -10000,
+                        "maximum": 100000,
+                        "type": "number"
+                      },
+                      "width": {
+                        "minimum": 0.01,
+                        "maximum": 100000,
+                        "type": "number"
+                      },
+                      "height": {
+                        "minimum": 0.01,
+                        "maximum": 100000,
+                        "type": "number"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "additionalProperties": false,
+            "type": "object",
+            "required": [
+              "event_id",
+              "seq",
+              "elapsed_ms",
+              "segment_id",
+              "viewport",
+              "type",
+              "action_id",
+              "method"
+            ],
+            "properties": {
+              "event_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "seq": {
+                "minimum": 0,
+                "maximum": 20000,
+                "type": "integer"
+              },
+              "elapsed_ms": {
+                "minimum": 0,
+                "maximum": 86400000,
+                "type": "number"
+              },
+              "segment_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "viewport": {
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                  "width",
+                  "height",
+                  "dpr",
+                  "visual_scale",
+                  "visual_offset_x",
+                  "visual_offset_y",
+                  "scroll_x",
+                  "scroll_y",
+                  "document_width",
+                  "document_height"
+                ],
+                "properties": {
+                  "width": {
+                    "minimum": 240,
+                    "maximum": 7680,
+                    "type": "integer"
+                  },
+                  "height": {
+                    "minimum": 200,
+                    "maximum": 4320,
+                    "type": "integer"
+                  },
+                  "dpr": {
+                    "minimum": 0.5,
+                    "maximum": 8,
+                    "type": "number"
+                  },
+                  "visual_scale": {
+                    "minimum": 0.25,
+                    "maximum": 8,
+                    "type": "number"
+                  },
+                  "visual_offset_x": {
+                    "minimum": -10000,
+                    "maximum": 10000,
+                    "type": "number"
+                  },
+                  "visual_offset_y": {
+                    "minimum": -10000,
+                    "maximum": 10000,
+                    "type": "number"
+                  },
+                  "scroll_x": {
+                    "minimum": 0,
+                    "maximum": 100000,
+                    "type": "number"
+                  },
+                  "scroll_y": {
+                    "minimum": 0,
+                    "maximum": 100000,
+                    "type": "number"
+                  },
+                  "document_width": {
+                    "minimum": 240,
+                    "maximum": 100000,
+                    "type": "integer"
+                  },
+                  "document_height": {
+                    "minimum": 200,
+                    "maximum": 100000,
+                    "type": "integer"
+                  }
+                }
+              },
+              "type": {
+                "const": "activation",
+                "type": "string"
+              },
+              "action_id": {
+                "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                "maxLength": 64,
+                "type": "string"
+              },
+              "element_id": {
+                "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                "maxLength": 64,
+                "type": "string"
+              },
+              "method": {
+                "anyOf": [
+                  {
+                    "const": "pointer",
+                    "type": "string"
+                  },
+                  {
+                    "const": "keyboard",
+                    "type": "string"
+                  },
+                  {
+                    "const": "host",
+                    "type": "string"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "additionalProperties": false,
+            "type": "object",
+            "required": [
+              "event_id",
+              "seq",
+              "elapsed_ms",
+              "segment_id",
+              "viewport",
+              "type",
+              "max_reach_px",
+              "max_reach_percent",
+              "max_scroll_percent",
+              "visible_ms",
+              "geometry_stable"
+            ],
+            "properties": {
+              "event_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "seq": {
+                "minimum": 0,
+                "maximum": 20000,
+                "type": "integer"
+              },
+              "elapsed_ms": {
+                "minimum": 0,
+                "maximum": 86400000,
+                "type": "number"
+              },
+              "segment_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "viewport": {
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                  "width",
+                  "height",
+                  "dpr",
+                  "visual_scale",
+                  "visual_offset_x",
+                  "visual_offset_y",
+                  "scroll_x",
+                  "scroll_y",
+                  "document_width",
+                  "document_height"
+                ],
+                "properties": {
+                  "width": {
+                    "minimum": 240,
+                    "maximum": 7680,
+                    "type": "integer"
+                  },
+                  "height": {
+                    "minimum": 200,
+                    "maximum": 4320,
+                    "type": "integer"
+                  },
+                  "dpr": {
+                    "minimum": 0.5,
+                    "maximum": 8,
+                    "type": "number"
+                  },
+                  "visual_scale": {
+                    "minimum": 0.25,
+                    "maximum": 8,
+                    "type": "number"
+                  },
+                  "visual_offset_x": {
+                    "minimum": -10000,
+                    "maximum": 10000,
+                    "type": "number"
+                  },
+                  "visual_offset_y": {
+                    "minimum": -10000,
+                    "maximum": 10000,
+                    "type": "number"
+                  },
+                  "scroll_x": {
+                    "minimum": 0,
+                    "maximum": 100000,
+                    "type": "number"
+                  },
+                  "scroll_y": {
+                    "minimum": 0,
+                    "maximum": 100000,
+                    "type": "number"
+                  },
+                  "document_width": {
+                    "minimum": 240,
+                    "maximum": 100000,
+                    "type": "integer"
+                  },
+                  "document_height": {
+                    "minimum": 200,
+                    "maximum": 100000,
+                    "type": "integer"
+                  }
+                }
+              },
+              "type": {
+                "const": "progress",
+                "type": "string"
+              },
+              "max_reach_px": {
+                "minimum": 0,
+                "maximum": 100000,
+                "type": "number"
+              },
+              "max_reach_percent": {
+                "minimum": 0,
+                "maximum": 100,
+                "type": "number"
+              },
+              "max_scroll_percent": {
+                "minimum": 0,
+                "maximum": 100,
+                "type": "number"
+              },
+              "visible_ms": {
+                "minimum": 0,
+                "maximum": 86400000,
+                "type": "number"
+              },
+              "geometry_stable": {
+                "type": "boolean"
+              }
+            }
+          },
+          {
+            "additionalProperties": false,
+            "type": "object",
+            "required": [
+              "event_id",
+              "seq",
+              "elapsed_ms",
+              "segment_id",
+              "viewport",
+              "type",
+              "element_id",
+              "qualified_ms",
+              "threshold",
+              "first_qualified"
+            ],
+            "properties": {
+              "event_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "seq": {
+                "minimum": 0,
+                "maximum": 20000,
+                "type": "integer"
+              },
+              "elapsed_ms": {
+                "minimum": 0,
+                "maximum": 86400000,
+                "type": "number"
+              },
+              "segment_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "viewport": {
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                  "width",
+                  "height",
+                  "dpr",
+                  "visual_scale",
+                  "visual_offset_x",
+                  "visual_offset_y",
+                  "scroll_x",
+                  "scroll_y",
+                  "document_width",
+                  "document_height"
+                ],
+                "properties": {
+                  "width": {
+                    "minimum": 240,
+                    "maximum": 7680,
+                    "type": "integer"
+                  },
+                  "height": {
+                    "minimum": 200,
+                    "maximum": 4320,
+                    "type": "integer"
+                  },
+                  "dpr": {
+                    "minimum": 0.5,
+                    "maximum": 8,
+                    "type": "number"
+                  },
+                  "visual_scale": {
+                    "minimum": 0.25,
+                    "maximum": 8,
+                    "type": "number"
+                  },
+                  "visual_offset_x": {
+                    "minimum": -10000,
+                    "maximum": 10000,
+                    "type": "number"
+                  },
+                  "visual_offset_y": {
+                    "minimum": -10000,
+                    "maximum": 10000,
+                    "type": "number"
+                  },
+                  "scroll_x": {
+                    "minimum": 0,
+                    "maximum": 100000,
+                    "type": "number"
+                  },
+                  "scroll_y": {
+                    "minimum": 0,
+                    "maximum": 100000,
+                    "type": "number"
+                  },
+                  "document_width": {
+                    "minimum": 240,
+                    "maximum": 100000,
+                    "type": "integer"
+                  },
+                  "document_height": {
+                    "minimum": 200,
+                    "maximum": 100000,
+                    "type": "integer"
+                  }
+                }
+              },
+              "type": {
+                "const": "exposure",
+                "type": "string"
+              },
+              "element_id": {
+                "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                "maxLength": 64,
+                "type": "string"
+              },
+              "qualified_ms": {
+                "minimum": 1000,
+                "maximum": 86400000,
+                "type": "number"
+              },
+              "threshold": {
+                "const": 0.5,
+                "type": "number"
+              },
+              "first_qualified": {
+                "type": "boolean"
+              }
+            }
+          },
+          {
+            "additionalProperties": false,
+            "type": "object",
+            "required": [
+              "event_id",
+              "seq",
+              "elapsed_ms",
+              "segment_id",
+              "viewport",
+              "type",
+              "kind",
+              "related_event_id"
+            ],
+            "properties": {
+              "event_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "seq": {
+                "minimum": 0,
+                "maximum": 20000,
+                "type": "integer"
+              },
+              "elapsed_ms": {
+                "minimum": 0,
+                "maximum": 86400000,
+                "type": "number"
+              },
+              "segment_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "viewport": {
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                  "width",
+                  "height",
+                  "dpr",
+                  "visual_scale",
+                  "visual_offset_x",
+                  "visual_offset_y",
+                  "scroll_x",
+                  "scroll_y",
+                  "document_width",
+                  "document_height"
+                ],
+                "properties": {
+                  "width": {
+                    "minimum": 240,
+                    "maximum": 7680,
+                    "type": "integer"
+                  },
+                  "height": {
+                    "minimum": 200,
+                    "maximum": 4320,
+                    "type": "integer"
+                  },
+                  "dpr": {
+                    "minimum": 0.5,
+                    "maximum": 8,
+                    "type": "number"
+                  },
+                  "visual_scale": {
+                    "minimum": 0.25,
+                    "maximum": 8,
+                    "type": "number"
+                  },
+                  "visual_offset_x": {
+                    "minimum": -10000,
+                    "maximum": 10000,
+                    "type": "number"
+                  },
+                  "visual_offset_y": {
+                    "minimum": -10000,
+                    "maximum": 10000,
+                    "type": "number"
+                  },
+                  "scroll_x": {
+                    "minimum": 0,
+                    "maximum": 100000,
+                    "type": "number"
+                  },
+                  "scroll_y": {
+                    "minimum": 0,
+                    "maximum": 100000,
+                    "type": "number"
+                  },
+                  "document_width": {
+                    "minimum": 240,
+                    "maximum": 100000,
+                    "type": "integer"
+                  },
+                  "document_height": {
+                    "minimum": 200,
+                    "maximum": 100000,
+                    "type": "integer"
+                  }
+                }
+              },
+              "type": {
+                "const": "diagnostic",
+                "type": "string"
+              },
+              "kind": {
+                "const": "dead_click",
+                "type": "string"
+              },
+              "related_event_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "element_id": {
+                "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                "maxLength": 64,
+                "type": "string"
+              }
+            }
+          },
+          {
+            "additionalProperties": false,
+            "type": "object",
+            "required": [
+              "event_id",
+              "seq",
+              "elapsed_ms",
+              "segment_id",
+              "viewport",
+              "type",
+              "kind",
+              "code"
+            ],
+            "properties": {
+              "event_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "seq": {
+                "minimum": 0,
+                "maximum": 20000,
+                "type": "integer"
+              },
+              "elapsed_ms": {
+                "minimum": 0,
+                "maximum": 86400000,
+                "type": "number"
+              },
+              "segment_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "viewport": {
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                  "width",
+                  "height",
+                  "dpr",
+                  "visual_scale",
+                  "visual_offset_x",
+                  "visual_offset_y",
+                  "scroll_x",
+                  "scroll_y",
+                  "document_width",
+                  "document_height"
+                ],
+                "properties": {
+                  "width": {
+                    "minimum": 240,
+                    "maximum": 7680,
+                    "type": "integer"
+                  },
+                  "height": {
+                    "minimum": 200,
+                    "maximum": 4320,
+                    "type": "integer"
+                  },
+                  "dpr": {
+                    "minimum": 0.5,
+                    "maximum": 8,
+                    "type": "number"
+                  },
+                  "visual_scale": {
+                    "minimum": 0.25,
+                    "maximum": 8,
+                    "type": "number"
+                  },
+                  "visual_offset_x": {
+                    "minimum": -10000,
+                    "maximum": 10000,
+                    "type": "number"
+                  },
+                  "visual_offset_y": {
+                    "minimum": -10000,
+                    "maximum": 10000,
+                    "type": "number"
+                  },
+                  "scroll_x": {
+                    "minimum": 0,
+                    "maximum": 100000,
+                    "type": "number"
+                  },
+                  "scroll_y": {
+                    "minimum": 0,
+                    "maximum": 100000,
+                    "type": "number"
+                  },
+                  "document_width": {
+                    "minimum": 240,
+                    "maximum": 100000,
+                    "type": "integer"
+                  },
+                  "document_height": {
+                    "minimum": 200,
+                    "maximum": 100000,
+                    "type": "integer"
+                  }
+                }
+              },
+              "type": {
+                "const": "diagnostic",
+                "type": "string"
+              },
+              "kind": {
+                "anyOf": [
+                  {
+                    "const": "runtime_error",
+                    "type": "string"
+                  },
+                  {
+                    "const": "unhandled_rejection",
+                    "type": "string"
+                  }
+                ]
+              },
+              "code": {
+                "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                "maxLength": 64,
+                "type": "string"
+              }
+            }
+          },
+          {
+            "additionalProperties": false,
+            "type": "object",
+            "required": [
+              "event_id",
+              "seq",
+              "elapsed_ms",
+              "segment_id",
+              "viewport",
+              "type",
+              "metric",
+              "value"
+            ],
+            "properties": {
+              "event_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "seq": {
+                "minimum": 0,
+                "maximum": 20000,
+                "type": "integer"
+              },
+              "elapsed_ms": {
+                "minimum": 0,
+                "maximum": 86400000,
+                "type": "number"
+              },
+              "segment_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "viewport": {
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                  "width",
+                  "height",
+                  "dpr",
+                  "visual_scale",
+                  "visual_offset_x",
+                  "visual_offset_y",
+                  "scroll_x",
+                  "scroll_y",
+                  "document_width",
+                  "document_height"
+                ],
+                "properties": {
+                  "width": {
+                    "minimum": 240,
+                    "maximum": 7680,
+                    "type": "integer"
+                  },
+                  "height": {
+                    "minimum": 200,
+                    "maximum": 4320,
+                    "type": "integer"
+                  },
+                  "dpr": {
+                    "minimum": 0.5,
+                    "maximum": 8,
+                    "type": "number"
+                  },
+                  "visual_scale": {
+                    "minimum": 0.25,
+                    "maximum": 8,
+                    "type": "number"
+                  },
+                  "visual_offset_x": {
+                    "minimum": -10000,
+                    "maximum": 10000,
+                    "type": "number"
+                  },
+                  "visual_offset_y": {
+                    "minimum": -10000,
+                    "maximum": 10000,
+                    "type": "number"
+                  },
+                  "scroll_x": {
+                    "minimum": 0,
+                    "maximum": 100000,
+                    "type": "number"
+                  },
+                  "scroll_y": {
+                    "minimum": 0,
+                    "maximum": 100000,
+                    "type": "number"
+                  },
+                  "document_width": {
+                    "minimum": 240,
+                    "maximum": 100000,
+                    "type": "integer"
+                  },
+                  "document_height": {
+                    "minimum": 200,
+                    "maximum": 100000,
+                    "type": "integer"
+                  }
+                }
+              },
+              "type": {
+                "const": "performance",
+                "type": "string"
+              },
+              "metric": {
+                "anyOf": [
+                  {
+                    "const": "navigation_load_ms",
+                    "type": "string"
+                  },
+                  {
+                    "const": "fcp_ms",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lcp_ms",
+                    "type": "string"
+                  },
+                  {
+                    "const": "interaction_latency_ms",
+                    "type": "string"
+                  },
+                  {
+                    "const": "layout_shift",
+                    "type": "string"
+                  }
+                ]
+              },
+              "value": {
+                "minimum": 0,
+                "maximum": 120000,
+                "type": "number"
+              }
+            }
+          },
+          {
+            "additionalProperties": false,
+            "type": "object",
+            "required": [
+              "event_id",
+              "seq",
+              "elapsed_ms",
+              "segment_id",
+              "viewport",
+              "type",
+              "retry_attempts",
+              "dropped_events",
+              "transport_failures"
+            ],
+            "properties": {
+              "event_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "seq": {
+                "minimum": 0,
+                "maximum": 20000,
+                "type": "integer"
+              },
+              "elapsed_ms": {
+                "minimum": 0,
+                "maximum": 86400000,
+                "type": "number"
+              },
+              "segment_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "viewport": {
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                  "width",
+                  "height",
+                  "dpr",
+                  "visual_scale",
+                  "visual_offset_x",
+                  "visual_offset_y",
+                  "scroll_x",
+                  "scroll_y",
+                  "document_width",
+                  "document_height"
+                ],
+                "properties": {
+                  "width": {
+                    "minimum": 240,
+                    "maximum": 7680,
+                    "type": "integer"
+                  },
+                  "height": {
+                    "minimum": 200,
+                    "maximum": 4320,
+                    "type": "integer"
+                  },
+                  "dpr": {
+                    "minimum": 0.5,
+                    "maximum": 8,
+                    "type": "number"
+                  },
+                  "visual_scale": {
+                    "minimum": 0.25,
+                    "maximum": 8,
+                    "type": "number"
+                  },
+                  "visual_offset_x": {
+                    "minimum": -10000,
+                    "maximum": 10000,
+                    "type": "number"
+                  },
+                  "visual_offset_y": {
+                    "minimum": -10000,
+                    "maximum": 10000,
+                    "type": "number"
+                  },
+                  "scroll_x": {
+                    "minimum": 0,
+                    "maximum": 100000,
+                    "type": "number"
+                  },
+                  "scroll_y": {
+                    "minimum": 0,
+                    "maximum": 100000,
+                    "type": "number"
+                  },
+                  "document_width": {
+                    "minimum": 240,
+                    "maximum": 100000,
+                    "type": "integer"
+                  },
+                  "document_height": {
+                    "minimum": 200,
+                    "maximum": 100000,
+                    "type": "integer"
+                  }
+                }
+              },
+              "type": {
+                "const": "delivery",
+                "type": "string"
+              },
+              "retry_attempts": {
+                "minimum": 0,
+                "maximum": 20000,
+                "type": "integer"
+              },
+              "dropped_events": {
+                "minimum": 0,
+                "maximum": 20000,
+                "type": "integer"
+              },
+              "transport_failures": {
+                "minimum": 0,
+                "maximum": 20000,
+                "type": "integer"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,15 @@
+:root {
+  color-scheme: light;
+  --chart-1: #cf481b;
+  --chart-2: #3167c5;
+  --chart-3: #23775b;
+  --chart-4: #8354bb;
+  --chart-5: #b34479;
+  --chart-6: #77702b;
+  --chart-7: #087d8c;
+  --chart-8: #985415;
+  --chart-axis: #595950;
+  --chart-grid: #eeece5;
+  --chart-cursor: #f6f3ec;
+  --chart-brush: #faf9f6;
+}

@@ -1,0 +1,18 @@
+/* Draw focus on the control's border, without a second offset ring. */
+:is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),select,textarea):is(:focus,:focus-visible) {
+ outline: none;
+ outline-offset: 0;
+ border-color: #a63811;
+ box-shadow: inset 0 0 0 1px #a63811;
+}
+
+/* Search fields share their container's single focus border. */
+:is(.search-box,.table-search):focus-within {
+ border-color: #a63811;
+ box-shadow: inset 0 0 0 1px #a63811;
+}
+:is(.search-box,.table-search) input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):is(:focus,:focus-visible) {
+ outline: none;
+ border-color: transparent;
+ box-shadow: none;
+}
