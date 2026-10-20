@@ -2,7 +2,7 @@
   "version": "0.3.0",
   "private": true,
   "type": "module",
-  "name": "@netbet/heatmap-local",
+  "name": "@infrared/local",
   "scripts": {
     "start": "pnpm --dir ../.. start"
   }

@@ -1,8 +1,8 @@
-export const PRODUCT_NAME='Heatlens';
+export const PRODUCT_NAME='Infrared';
 export const PRODUCT_BYLINE='by Graphoria';
 
 export function ProductMark({className=''}:{className?:string}) {
- return <img className={'product-mark '+className} src="/branding/heatlens-mark.svg" alt="" aria-hidden="true" width="40" height="40"/>;
+ return <img className={'product-mark '+className} src="/branding/infrared-mark.svg" alt="" aria-hidden="true" width="40" height="40"/>;
 }
 
 export function ProductBrand(){
@@ -10,5 +10,5 @@ export function ProductBrand(){
 }
 
 export function WorkspaceBrand({onHome}:{onHome:()=>void}) {
- return <div className="workspace-brand"><a className="brand" href="#pages" aria-label="Heatlens by Graphoria home" onClick={onHome}><ProductBrand/></a></div>;
+ return <div className="workspace-brand"><a className="brand" href="#pages" aria-label="Infrared by Graphoria home" onClick={onHome}><ProductBrand/></a></div>;
 }

@@ -1,4 +1,4 @@
-/* Heatlens product identity and locally hosted Inter fonts. */
+/* Infrared product identity and locally hosted Inter fonts. */
 @font-face { font-family: Inter; src: url('/branding/Inter-Regular.ttf') format('truetype'); font-style: normal; font-weight: 400 500; font-display: swap; }
 @font-face { font-family: Inter; src: url('/branding/Inter-SemiBold.ttf') format('truetype'); font-style: normal; font-weight: 600 900; font-display: swap; }
 :root {

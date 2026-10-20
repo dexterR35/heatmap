@@ -2,9 +2,11 @@ import { randomUUID } from 'node:crypto';
 import type { DB } from '../../packages/db/index.js';
 import type { Batch, Event, Viewport } from '../../packages/contracts/events.js';
 import { ingest } from './ingestion.js';
+import { loopbackOrigin } from '../../packages/config/origins.js';
 export const elements=['hero','hero-register','benefits','games','games-register','faq','footer'];
 export const actions=['registration-start'];
 export async function seedRegistry(db:DB,demoOrigin:string) {
+ demoOrigin=loopbackOrigin(demoOrigin,'DEMO');
  await db.transaction(async tx=>{
   const [existing]=await tx.query("SELECT id,origin FROM sites WHERE id='local-demo' FOR UPDATE");
   if(!existing){
@@ -15,19 +17,10 @@ export async function seedRegistry(db:DB,demoOrigin:string) {
    await tx.query("UPDATE sites SET origin=$1,config_version=config_version+1 WHERE id='local-demo'",[demoOrigin]);
    await tx.query("UPDATE pages SET selector=jsonb_set(selector,'{origin}',to_jsonb($1::text)) WHERE site_id='local-demo' AND selector->>'origin'=$2",[demoOrigin,existing.origin]);
   }
-  const real=await tx.query('SELECT id FROM sites WHERE origin=$1',['https://go.netbet.ro']);
-  if(!real.length){
-   await tx.query("INSERT INTO sites(id,site_key,name,origin,domain_group,market,family,environment) VALUES($1,$2,'NetBet Romania','https://go.netbet.ro','netbet.ro',NULL,'go','real')",['netbet-ro-go','site_'+randomUUID().replaceAll('-','')]);
-   await tx.query('INSERT INTO pages(site_id,page_key,name,selector,product) VALUES($1,$2,$3,$4,$5)',['netbet-ro-go','casino-halloween','Casino · Halloween',JSON.stringify({origin:'https://go.netbet.ro',path:'/casino/',query_equals:{lp:'halloween'},ignored_query_names:[],other_query_policy:'reject',duplicate_query_policy:'reject',fragment_policy:'ignore_anchor'}),'casino']);
-  }
   await tx.query('INSERT INTO config_history(site_id,version,sample_rate) SELECT id,config_version,sample_rate FROM sites ON CONFLICT DO NOTHING');
   if(!(await tx.query("SELECT 1 FROM settings WHERE key='growth_registry_v1'")).length){
    await tx.query("UPDATE sites SET currency='GBP',report_timezone='Europe/London' WHERE id='local-demo'");
    await tx.query("UPDATE pages SET product='casino',page_family='seasonal' WHERE site_id='local-demo' AND page_key IN ('casino-halloween','casino-christmas')");
-   if(!(await tx.query("SELECT 1 FROM sites WHERE origin='https://go.netbet.co.uk'")).length){
-    await tx.query("INSERT INTO sites(id,site_key,name,origin,domain_group,market,family,environment,brand,currency,report_timezone) VALUES('netbet-uk-go',$1,'NetBet United Kingdom','https://go.netbet.co.uk','netbet.co.uk','UK','go','real','netbet','GBP','Europe/London')",['site_'+randomUUID().replaceAll('-','')]);
-    await tx.query("INSERT INTO pages(site_id,page_key,name,selector,product,market,page_family) VALUES('netbet-uk-go','casino-nb-max-wo','UK Casino · NB Max WO',$1,'casino','UK','nb-max')",[JSON.stringify({origin:'https://go.netbet.co.uk',path:'/casino/',query_equals:{lp:'nb-max-wo'},ignored_query_names:[],other_query_policy:'reject',duplicate_query_policy:'reject',fragment_policy:'ignore_anchor'})]);
-   }
    await tx.query('INSERT INTO config_history(site_id,version,sample_rate) SELECT id,config_version,sample_rate FROM sites ON CONFLICT DO NOTHING');
    await tx.query("INSERT INTO settings(key,value) VALUES('growth_registry_v1','true')");
   }

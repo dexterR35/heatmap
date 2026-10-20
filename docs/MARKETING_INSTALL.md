@@ -6,7 +6,7 @@ The installable unit is a selected URL, not a hostname or a whole website. The c
 
 Use **Landing pages → Add landing page**. Paste a public URL containing only reviewed static rendering selectors. Remove personal, attribution, token, search, or account values first. Review the parsed origin, exact path and query constants. Enter a display name, stable page key and product label. Save the disabled draft.
 
-For the supplied target, inclusion is exactly `https://go.netbet.ro/casino/?lp=halloween`. This does not include `/`, `/casino/`, `?lp=christmas`, another hostname, or duplicate `lp` parameters. Ignored query parameters are an explicit policy decision; new drafts ignore none. The local fixture explicitly ignores `utm_source`, `utm_medium`, and `utm_campaign` without retaining their values.
+For the supplied target, inclusion is exactly `https://landing.example.com/casino/?lp=halloween`. This does not include `/`, `/casino/`, `?lp=christmas`, another hostname, or duplicate `lp` parameters. Ignored query parameters are an explicit policy decision; new drafts ignore none. The local fixture explicitly ignores `utm_source`, `utm_medium`, and `utm_campaign` without retaining their values.
 
 No real URL is fetched or instrumented by registering it. Confirm the final rendered destination, ownership, release, CMP, page-context adapter, CSP and privacy approvals separately. A redirecting host cannot observe a rendered page view at its source.
 
@@ -20,7 +20,7 @@ The actual SDK download and config requests wait for BOTH host calls below:
 
 ```js
 // After the URL, rendered content and release are consistent:
-window.NBHeatmapHost.setContext({
+window.InfraredHost.setContext({
   eligible: true,
   pageKey: 'casino-halloween',
   revision: 'demo-v1',
@@ -30,10 +30,10 @@ window.NBHeatmapHost.setContext({
 });
 
 // From the reviewed CMP analytics-category callback:
-window.NBHeatmapHost.setConsent('granted');
+window.InfraredHost.setConsent('granted');
 ```
 
-These values describe the synthetic fixture. They are not verified NetBet production release or CMP values. A live integration needs its approved production values, HTTPS collector, and a separately released live-capable build. The event API currently rejects every real environment even if database flags are changed.
+These values describe the synthetic fixture. They are not verified customer production release or CMP values. A live integration needs its approved production values, HTTPS collector, and a separately released live-capable build. The event API currently rejects every real environment even if database flags are changed.
 
 ## 3. Connect consent and sensitive contexts
 
@@ -42,7 +42,7 @@ Call `setConsent('denied')` immediately on opt-out or withdrawal. Unknown consen
 Before displaying login, registration, payment, game, account, responsible-gambling, or any other excluded UI, call:
 
 ```js
-window.NBHeatmapHost.setContext({ ...currentPublicContext, eligible: false });
+window.InfraredHost.setContext({ ...currentPublicContext, eligible: false });
 ```
 
 Do not infer eligibility by inspecting cookies or account DOM. The site must supply this signal. Query-only navigation invalidates the old context; call `setContext` again only after the next selected page has actually rendered. Changing an explicitly ignored attribution parameter does not create another view.
@@ -76,11 +76,11 @@ Verify in browser network tools:
 6. `?lp=christmas` is a separate page with a separate reference; old content is never relabeled.
 7. Page, revision, viewport width and document height match an approved reference. Missing references show explicit exclusions.
 
-`window.NBHeatmap?.getStatus()` returns only bounded state/counters. `flush()` is best-effort. `204` means the collector committed, not that all possible visitor behavior was observed.
+`window.InfraredSDK?.getStatus()` returns only bounded state/counters. `flush()` is best-effort. `204` means the collector committed, not that all possible visitor behavior was observed.
 
 ## 6. Rollback
 
-Pause the selected page in the dashboard, or use the global collection stop. Remove its host bridge/tag and consent/context callbacks. Call `window.NBHeatmapHost?.destroy()` to tear down the current document integration and restore wrapped history APIs. Removing a loader does not delete previously accepted data; retention/deletion requires the documented operational workflow.
+Pause the selected page in the dashboard, or use the global collection stop. Remove its host bridge/tag and consent/context callbacks. Call `window.InfraredHost?.destroy()` to tear down the current document integration and restore wrapped history APIs. Removing a loader does not delete previously accepted data; retention/deletion requires the documented operational workflow.
 
 Installation does not certify production privacy, legal, security, infrastructure, or consent approval.
 

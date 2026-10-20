@@ -12,12 +12,14 @@ export async function audit(db:DB,userId:string|null,action:string,siteId:string
 }
 export class Limiter {
  private salt=token();private rotated=Date.now();private entries=new Map<string,{n:number;until:number}>();
+ constructor(private readonly capacity=10000){}
  check(key:string,limit:number,window=60000) {
   const now=Date.now();if(now-this.rotated>3600000){this.entries.clear();this.salt=token();this.rotated=now;}
-  if(this.entries.size>10000) {for(const [k,v] of this.entries)if(v.until<now)this.entries.delete(k);if(this.entries.size>10000)throw new Problem(429,'RATE_LIMIT');}
   const k=createHmac('sha256',this.salt).update(key).digest('hex');const v=this.entries.get(k);
-  if(!v||v.until<now){this.entries.set(k,{n:1,until:now+window});return;}
-  if(++v.n>limit)throw new Problem(429,'RATE_LIMIT');
+  if(v&&v.until>=now){if(++v.n>limit)throw new Problem(429,'RATE_LIMIT');return;}
+  // A full table must never reject unrelated callers. Windows restart by re-insertion, so the first entry is the oldest.
+  this.entries.delete(k);if(this.entries.size>=this.capacity)this.entries.delete(this.entries.keys().next().value!);
+  this.entries.set(k,{n:1,until:now+window});
  }
 }
 export function canonical(value:unknown):string {

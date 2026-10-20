@@ -29,7 +29,7 @@ export const readDocument:Read=async(url,signal,allowDemo)=>{
  if(demo&&!answers.every(a=>a.address==='127.0.0.1'||a.address==='::1'))throw new Error('UNSAFE_TARGET');
  const address=answers[0],limit=512*1024;
  return new Promise<Document>((resolve,reject)=>{
-  const req=(url.protocol==='https:'?httpsRequest:httpRequest)(url,{agent:false,signal,headers:{'User-Agent':'NetBet-Heatmap-Installation-Check/1.0','Accept':'text/html,application/javascript,text/javascript;q=0.9','Accept-Encoding':'identity'},lookup:((_h:any,options:any,cb:any)=>options?.all?cb(null,[address]):cb(null,address.address,address.family)) as any},res=>{
+  const req=(url.protocol==='https:'?httpsRequest:httpRequest)(url,{agent:false,signal,headers:{'User-Agent':'Infrared-Installation-Check/1.0','Accept':'text/html,application/javascript,text/javascript;q=0.9','Accept-Encoding':'identity'},lookup:((_h:any,options:any,cb:any)=>options?.all?cb(null,[address]):cb(null,address.address,address.family)) as any},res=>{
    let size=0,done=false;const chunks:Buffer[]=[],response_ms=Math.round(performance.now()-started);
    const finish=(truncated:boolean)=>{if(done)return;done=true;resolve({status:res.statusCode??0,type:String(res.headers['content-type']??''),location:res.headers.location,body:Buffer.concat(chunks).toString('utf8'),truncated,response_ms,document_ms:Math.round(performance.now()-started)});};
    res.on('data',(chunk:Buffer)=>{const remaining=limit-size;if(remaining>0){chunks.push(chunk.subarray(0,remaining));size+=chunk.length;}if(size>=limit){finish(true);res.destroy();}});
@@ -63,7 +63,7 @@ export async function probeInstallation(site:{site_key:string;environment:string
   // follow tags, or manufacture events to make a check look successful.
   result.scripts_unchecked+=Math.max(0,sources.length-4);
   for(const src of sources.slice(0,4)){try{const script=await read(new URL(src),signal,allowDemo);if(script.status===200&&/javascript|ecmascript|text\/plain/i.test(script.type)){source+='\n'+script.body;result.scripts_checked++;if(script.truncated)result.scripts_unchecked++;}else result.scripts_unchecked++;}catch{result.scripts_unchecked++;}}
-  const marker=/\bNBHeatmap(?:Bridge|Host)?\b/.test(source)||/\/sdk\/v1\/tracker\.[\w.-]+\.js/.test(source);
+  const marker=/\bInfrared(?:SDK|Bridge|Host)\b/.test(source)||/\/sdk\/v1\/tracker\.[\w.-]+\.js/.test(source);
   if(marker){result.pixel='detected';result.identity=source.includes(site.site_key)?'matched':'unverified';result.endpoint=source.includes(config.collectorOrigin)?'matched':'unverified';}
   else{result.pixel='not_found_in_html';result.reason='DYNAMIC_OR_CONSENT_LOADING_NOT_VERIFIED';}
   if(document.truncated)result.reason='DOCUMENT_TRUNCATED';

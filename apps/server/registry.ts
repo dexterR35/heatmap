@@ -1,7 +1,7 @@
 import {randomUUID} from 'node:crypto';
 import type {DB} from '../../packages/db/index.js';
 import type {RegistryRow} from '../../packages/contracts/acquisition.js';
-import {parseAddress,selectorsOverlap,type Selector} from '../../packages/domain/matcher.js';
+import {parseAddress,selectorsOverlap,type Selector,MARKETING_PARAMS} from '../../packages/domain/matcher.js';
 import {validateSelector} from '../../packages/security/validation.js';
 import {Problem,canonical} from './security.js';
 type Access=(site:string,tx:DB)=>Promise<unknown>;
@@ -10,8 +10,9 @@ export async function importRegistry(db:DB,rows:RegistryRow[],dryRun:boolean,own
   const plans:any[]=[],errors:{row:number;code:string}[]=[],seen=new Set<string>(),siteMetadata=new Map<string,string>();
   const siblings=new Map<string,{page_key:string;selector:Selector}[]>();
   for(let i=0;i<rows.length;i++)try{
-   const r=rows[i],u=parseAddress(r.url);if(!u||u.hash||[...u.searchParams.keys()].some(k=>k!=='lp')||!u.searchParams.get('lp'))throw new Problem(422,'EXACT_LP_URL_REQUIRED');
-   const selector:Selector={origin:u.origin,path:u.pathname,query_equals:Object.fromEntries(u.searchParams),ignored_query_names:[],other_query_policy:'reject',duplicate_query_policy:'reject',fragment_policy:'ignore_anchor'};validateSelector(selector);
+   const r=rows[i],u=parseAddress(r.url);if(!u||u.hash)throw new Problem(422,'EXACT_PAGE_URL_REQUIRED');
+   // Marketing tags in a pasted URL describe one visit, not the page, so they never become required values.
+   const selector:Selector={origin:u.origin,path:u.pathname,query_equals:Object.fromEntries([...u.searchParams].filter(([k])=>!MARKETING_PARAMS.includes(k))),ignored_query_names:[],other_query_policy:r.other_query_policy??'ignore',duplicate_query_policy:'reject',fragment_policy:'ignore_anchor'};validateSelector(selector);
    try{new Intl.DateTimeFormat('en',{timeZone:r.report_timezone});}catch{throw new Problem(422,'TIMEZONE_INVALID');}
    const identity=u.origin+'/'+r.page_key;if(seen.has(identity))throw new Problem(422,'DUPLICATE_IMPORT_IDENTITY');seen.add(identity);
    const metadata=canonical({brand:r.brand,currency:r.currency,report_timezone:r.report_timezone});if(siteMetadata.has(u.origin)&&siteMetadata.get(u.origin)!==metadata)throw new Problem(422,'SITE_METADATA_CONFLICT');siteMetadata.set(u.origin,metadata);

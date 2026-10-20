@@ -15,17 +15,17 @@ const credentials={email:'security@example.invalid',password:'Synthetic security
 async function login(cookie=''){
  const pre=await app.inject({url:'/api/auth/csrf',headers:{...base,cookie}});
  const r=await app.inject({method:'POST',url:'/api/auth/login',headers:{...base,'x-csrf-token':pre.json().login_token,cookie:pre.cookies.map(c=>c.name+'='+c.value).join('; ')},payload:credentials});
- expect(r.statusCode).toBe(200);csrf=r.json().csrf;session=r.cookies.filter(c=>c.name==='nb_session').map(c=>c.name+'='+c.value).join('; ');return r;
+ expect(r.statusCode).toBe(200);csrf=r.json().csrf;session=r.cookies.filter(c=>c.name==='ir_session').map(c=>c.name+'='+c.value).join('; ');return r;
 }
 beforeAll(async()=>{db=await testDB();await db.query("INSERT INTO users(id,email,password_hash,role) VALUES('security-owner',$1,$2,'owner')",[credentials.email,await passwordHash(credentials.password)]);app=createManagement(db,new Map());await app.ready();await login();});
 afterAll(async()=>{await app.close();await db.close();});
 it('rejects a forged unsigned pre-login cookie even when its header matches',async()=>{
- const r=await app.inject({method:'POST',url:'/api/auth/login',headers:{...base,cookie:'nb_login_csrf=attacker-choice','x-csrf-token':'attacker-choice'},payload:credentials});expect(r.statusCode).toBe(403);expect(r.json().error.code).toBe('CSRF_INVALID');
+ const r=await app.inject({method:'POST',url:'/api/auth/login',headers:{...base,cookie:'ir_login_csrf=attacker-choice','x-csrf-token':'attacker-choice'},payload:credentials});expect(r.statusCode).toBe(403);expect(r.json().error.code).toBe('CSRF_INVALID');
 });
 it('recovers login after idle expiry and rotates the expired session',async()=>{
  const old=session;await db.query("UPDATE sessions SET last_seen=now()-interval '2 hours' WHERE user_id='security-owner'");
  expect((await app.inject({url:'/api/bootstrap',headers:auth()})).statusCode).toBe(401);
- const pre=await app.inject({url:'/api/auth/csrf',headers:{...base,cookie:old}});expect(pre.json().token).toBe(pre.json().login_token);expect(pre.cookies.find(c=>c.name==='nb_login_csrf')!.value).not.toBe(pre.json().login_token);
+ const pre=await app.inject({url:'/api/auth/csrf',headers:{...base,cookie:old}});expect(pre.json().token).toBe(pre.json().login_token);expect(pre.cookies.find(c=>c.name==='ir_login_csrf')!.value).not.toBe(pre.json().login_token);
  await login(old);expect(session).not.toBe(old);
  expect((await app.inject({url:'/api/bootstrap',headers:{...base,cookie:old}})).statusCode).toBe(401);
 });
@@ -77,7 +77,7 @@ it('sends restrictive headers and does not serve private files or collector mana
 });
 it('rejects expired signed login tokens and absolute-expired sessions',async()=>{
  const nonce='a'.repeat(43),cookie=app.signCookie(nonce+'.0000000000000');
- const r=await app.inject({method:'POST',url:'/api/auth/login',headers:{...base,cookie:'nb_login_csrf='+encodeURIComponent(cookie),'x-csrf-token':nonce},payload:credentials});expect(r.statusCode).toBe(403);
+ const r=await app.inject({method:'POST',url:'/api/auth/login',headers:{...base,cookie:'ir_login_csrf='+encodeURIComponent(cookie),'x-csrf-token':nonce},payload:credentials});expect(r.statusCode).toBe(403);
  const expired=randomUUID();await db.query("INSERT INTO sessions(token_hash,user_id,csrf,expires_at) VALUES($1,'security-owner','expired',now()-interval '1 minute')",[digest(expired)]);
- expect((await app.inject({url:'/api/bootstrap',headers:{...base,cookie:'nb_session='+expired}})).statusCode).toBe(401);
+ expect((await app.inject({url:'/api/bootstrap',headers:{...base,cookie:'ir_session='+expired}})).statusCode).toBe(401);
 });

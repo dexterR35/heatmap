@@ -7,7 +7,7 @@ import type {DB} from '../packages/db/index.js';
 
 let db:DB,app:ReturnType<typeof createManagement>;
 const owner=randomUUID(),viewer=randomUUID(),host='127.0.0.1:3000';
-const headers={host,cookie:'nb_session='+owner};
+const headers={host,cookie:'ir_session='+owner};
 beforeAll(async()=>{
  db=await testDB();app=createManagement(db,new Map());await app.ready();
  for(const [id,role,session] of [['table-owner','owner',owner],['table-viewer','viewer',viewer]]){
@@ -45,7 +45,7 @@ it('serves complete maintenance history and sorts nullable fields with nulls las
 it('enforces authentication, owner-only history and strict bounded query validation',async()=>{
  for(const endpoint of ['/api/tables/audit','/api/tables/operations']){
   expect((await app.inject({url:endpoint,headers:{host}})).statusCode).toBe(401);
-  expect((await app.inject({url:endpoint,headers:{host,cookie:'nb_session='+viewer}})).statusCode).toBe(403);
+  expect((await app.inject({url:endpoint,headers:{host,cookie:'ir_session='+viewer}})).statusCode).toBe(403);
   for(const query of ['page=-1','page=1.5','page=01','page=1000000','page=1&page=2','page_size=0','page_size=10000','sort=id','direction=DESC','secret=1','search=%00','as_of=2020-99-01T00:00:00.000Z'])expect((await get(endpoint+'?'+query)).statusCode,endpoint+'?'+query).toBe(400);
  }
  expect((await get('/api/tables/audit?sort='+encodeURIComponent('created_at;DROP TABLE audit'))).statusCode).toBe(400);

@@ -1,7 +1,7 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "NetBet Heatmap Studio · local synthetic API",
+    "title": "Infrared · local synthetic API",
     "version": "0.4.0",
     "description": "Reference route inventory and exact event schema. Management routes require session auth plus expected Host; mutations require expected Origin and X-CSRF-Token. Route-specific management body/query schemas remain in management.ts."
   },
@@ -138,6 +138,20 @@
                       "acquisition_id": {
                         "format": "uuid",
                         "type": "string"
+                      },
+                      "session_id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "session_seq": {
+                        "minimum": 1,
+                        "maximum": 1000,
+                        "type": "integer"
+                      },
+                      "page_path": {
+                        "pattern": "^/[a-zA-Z0-9._~:*/-]{0,1023}$",
+                        "maxLength": 1024,
+                        "type": "string"
                       }
                     }
                   },
@@ -248,6 +262,265 @@
                             "type": {
                               "const": "page_view",
                               "type": "string"
+                            },
+                            "source": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "required": [
+                                "channel"
+                              ],
+                              "properties": {
+                                "channel": {
+                                  "anyOf": [
+                                    {
+                                      "const": "direct",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "search",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "social",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "paid",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "email",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "referral",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "internal",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "unknown",
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
+                                "engine": {
+                                  "anyOf": [
+                                    {
+                                      "const": "google",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "bing",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "yahoo",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "duckduckgo",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "yandex",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "baidu",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "ecosia",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "facebook",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "instagram",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "tiktok",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "x",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "youtube",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "linkedin",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "reddit",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "pinterest",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "snapchat",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "whatsapp",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "telegram",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "other",
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
+                                "click_id": {
+                                  "anyOf": [
+                                    {
+                                      "const": "google",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "meta",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "tiktok",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "microsoft",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "linkedin",
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
+                                "utm_source": {
+                                  "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+                                  "maxLength": 64,
+                                  "type": "string"
+                                },
+                                "utm_medium": {
+                                  "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+                                  "maxLength": 64,
+                                  "type": "string"
+                                },
+                                "utm_campaign": {
+                                  "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+                                  "maxLength": 64,
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "client": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "required": [
+                                "browser",
+                                "os",
+                                "device"
+                              ],
+                              "properties": {
+                                "browser": {
+                                  "anyOf": [
+                                    {
+                                      "const": "chrome",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "safari",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "firefox",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "edge",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "samsung",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "opera",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "other",
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
+                                "os": {
+                                  "anyOf": [
+                                    {
+                                      "const": "windows",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "macos",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "ios",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "android",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "linux",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "chromeos",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "other",
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
+                                "device": {
+                                  "anyOf": [
+                                    {
+                                      "const": "mobile",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "tablet",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "desktop",
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
+                                "language": {
+                                  "pattern": "^[a-z]{2,3}$",
+                                  "type": "string"
+                                }
+                              }
                             }
                           }
                         },
@@ -1354,6 +1627,765 @@
                             "value": {
                               "minimum": 0,
                               "maximum": 120000,
+                              "type": "number"
+                            }
+                          }
+                        },
+                        {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "required": [
+                            "event_id",
+                            "seq",
+                            "elapsed_ms",
+                            "segment_id",
+                            "viewport",
+                            "type",
+                            "bands"
+                          ],
+                          "properties": {
+                            "event_id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "seq": {
+                              "minimum": 0,
+                              "maximum": 20000,
+                              "type": "integer"
+                            },
+                            "elapsed_ms": {
+                              "minimum": 0,
+                              "maximum": 86400000,
+                              "type": "number"
+                            },
+                            "segment_id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "viewport": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "required": [
+                                "width",
+                                "height",
+                                "dpr",
+                                "visual_scale",
+                                "visual_offset_x",
+                                "visual_offset_y",
+                                "scroll_x",
+                                "scroll_y",
+                                "document_width",
+                                "document_height"
+                              ],
+                              "properties": {
+                                "width": {
+                                  "minimum": 240,
+                                  "maximum": 7680,
+                                  "type": "integer"
+                                },
+                                "height": {
+                                  "minimum": 200,
+                                  "maximum": 4320,
+                                  "type": "integer"
+                                },
+                                "dpr": {
+                                  "minimum": 0.5,
+                                  "maximum": 8,
+                                  "type": "number"
+                                },
+                                "visual_scale": {
+                                  "minimum": 0.25,
+                                  "maximum": 8,
+                                  "type": "number"
+                                },
+                                "visual_offset_x": {
+                                  "minimum": -10000,
+                                  "maximum": 10000,
+                                  "type": "number"
+                                },
+                                "visual_offset_y": {
+                                  "minimum": -10000,
+                                  "maximum": 10000,
+                                  "type": "number"
+                                },
+                                "scroll_x": {
+                                  "minimum": 0,
+                                  "maximum": 100000,
+                                  "type": "number"
+                                },
+                                "scroll_y": {
+                                  "minimum": 0,
+                                  "maximum": 100000,
+                                  "type": "number"
+                                },
+                                "document_width": {
+                                  "minimum": 240,
+                                  "maximum": 100000,
+                                  "type": "integer"
+                                },
+                                "document_height": {
+                                  "minimum": 200,
+                                  "maximum": 100000,
+                                  "type": "integer"
+                                }
+                              }
+                            },
+                            "type": {
+                              "const": "attention",
+                              "type": "string"
+                            },
+                            "bands": {
+                              "minItems": 20,
+                              "maxItems": 20,
+                              "type": "array",
+                              "items": {
+                                "minimum": 0,
+                                "maximum": 86400000,
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "required": [
+                            "event_id",
+                            "seq",
+                            "elapsed_ms",
+                            "segment_id",
+                            "viewport",
+                            "type",
+                            "cells"
+                          ],
+                          "properties": {
+                            "event_id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "seq": {
+                              "minimum": 0,
+                              "maximum": 20000,
+                              "type": "integer"
+                            },
+                            "elapsed_ms": {
+                              "minimum": 0,
+                              "maximum": 86400000,
+                              "type": "number"
+                            },
+                            "segment_id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "viewport": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "required": [
+                                "width",
+                                "height",
+                                "dpr",
+                                "visual_scale",
+                                "visual_offset_x",
+                                "visual_offset_y",
+                                "scroll_x",
+                                "scroll_y",
+                                "document_width",
+                                "document_height"
+                              ],
+                              "properties": {
+                                "width": {
+                                  "minimum": 240,
+                                  "maximum": 7680,
+                                  "type": "integer"
+                                },
+                                "height": {
+                                  "minimum": 200,
+                                  "maximum": 4320,
+                                  "type": "integer"
+                                },
+                                "dpr": {
+                                  "minimum": 0.5,
+                                  "maximum": 8,
+                                  "type": "number"
+                                },
+                                "visual_scale": {
+                                  "minimum": 0.25,
+                                  "maximum": 8,
+                                  "type": "number"
+                                },
+                                "visual_offset_x": {
+                                  "minimum": -10000,
+                                  "maximum": 10000,
+                                  "type": "number"
+                                },
+                                "visual_offset_y": {
+                                  "minimum": -10000,
+                                  "maximum": 10000,
+                                  "type": "number"
+                                },
+                                "scroll_x": {
+                                  "minimum": 0,
+                                  "maximum": 100000,
+                                  "type": "number"
+                                },
+                                "scroll_y": {
+                                  "minimum": 0,
+                                  "maximum": 100000,
+                                  "type": "number"
+                                },
+                                "document_width": {
+                                  "minimum": 240,
+                                  "maximum": 100000,
+                                  "type": "integer"
+                                },
+                                "document_height": {
+                                  "minimum": 200,
+                                  "maximum": 100000,
+                                  "type": "integer"
+                                }
+                              }
+                            },
+                            "type": {
+                              "const": "movement",
+                              "type": "string"
+                            },
+                            "cells": {
+                              "minItems": 1,
+                              "maxItems": 200,
+                              "type": "array",
+                              "items": {
+                                "additionalProperties": false,
+                                "type": "object",
+                                "required": [
+                                  "x",
+                                  "y",
+                                  "n"
+                                ],
+                                "properties": {
+                                  "x": {
+                                    "minimum": 0,
+                                    "maximum": 100000,
+                                    "type": "integer"
+                                  },
+                                  "y": {
+                                    "minimum": 0,
+                                    "maximum": 100000,
+                                    "type": "integer"
+                                  },
+                                  "n": {
+                                    "minimum": 1,
+                                    "maximum": 1000,
+                                    "type": "integer"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "required": [
+                            "event_id",
+                            "seq",
+                            "elapsed_ms",
+                            "segment_id",
+                            "viewport",
+                            "type",
+                            "form_id",
+                            "action"
+                          ],
+                          "properties": {
+                            "event_id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "seq": {
+                              "minimum": 0,
+                              "maximum": 20000,
+                              "type": "integer"
+                            },
+                            "elapsed_ms": {
+                              "minimum": 0,
+                              "maximum": 86400000,
+                              "type": "number"
+                            },
+                            "segment_id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "viewport": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "required": [
+                                "width",
+                                "height",
+                                "dpr",
+                                "visual_scale",
+                                "visual_offset_x",
+                                "visual_offset_y",
+                                "scroll_x",
+                                "scroll_y",
+                                "document_width",
+                                "document_height"
+                              ],
+                              "properties": {
+                                "width": {
+                                  "minimum": 240,
+                                  "maximum": 7680,
+                                  "type": "integer"
+                                },
+                                "height": {
+                                  "minimum": 200,
+                                  "maximum": 4320,
+                                  "type": "integer"
+                                },
+                                "dpr": {
+                                  "minimum": 0.5,
+                                  "maximum": 8,
+                                  "type": "number"
+                                },
+                                "visual_scale": {
+                                  "minimum": 0.25,
+                                  "maximum": 8,
+                                  "type": "number"
+                                },
+                                "visual_offset_x": {
+                                  "minimum": -10000,
+                                  "maximum": 10000,
+                                  "type": "number"
+                                },
+                                "visual_offset_y": {
+                                  "minimum": -10000,
+                                  "maximum": 10000,
+                                  "type": "number"
+                                },
+                                "scroll_x": {
+                                  "minimum": 0,
+                                  "maximum": 100000,
+                                  "type": "number"
+                                },
+                                "scroll_y": {
+                                  "minimum": 0,
+                                  "maximum": 100000,
+                                  "type": "number"
+                                },
+                                "document_width": {
+                                  "minimum": 240,
+                                  "maximum": 100000,
+                                  "type": "integer"
+                                },
+                                "document_height": {
+                                  "minimum": 200,
+                                  "maximum": 100000,
+                                  "type": "integer"
+                                }
+                              }
+                            },
+                            "type": {
+                              "const": "form",
+                              "type": "string"
+                            },
+                            "form_id": {
+                              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                              "maxLength": 64,
+                              "type": "string"
+                            },
+                            "field_id": {
+                              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                              "maxLength": 64,
+                              "type": "string"
+                            },
+                            "action": {
+                              "anyOf": [
+                                {
+                                  "const": "start",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "field_complete",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "field_error",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "submit",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "duration_ms": {
+                              "minimum": 0,
+                              "maximum": 86400000,
+                              "type": "number"
+                            },
+                            "filled": {
+                              "type": "boolean"
+                            }
+                          }
+                        },
+                        {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "required": [
+                            "event_id",
+                            "seq",
+                            "elapsed_ms",
+                            "segment_id",
+                            "viewport",
+                            "type",
+                            "element_id",
+                            "hover_ms"
+                          ],
+                          "properties": {
+                            "event_id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "seq": {
+                              "minimum": 0,
+                              "maximum": 20000,
+                              "type": "integer"
+                            },
+                            "elapsed_ms": {
+                              "minimum": 0,
+                              "maximum": 86400000,
+                              "type": "number"
+                            },
+                            "segment_id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "viewport": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "required": [
+                                "width",
+                                "height",
+                                "dpr",
+                                "visual_scale",
+                                "visual_offset_x",
+                                "visual_offset_y",
+                                "scroll_x",
+                                "scroll_y",
+                                "document_width",
+                                "document_height"
+                              ],
+                              "properties": {
+                                "width": {
+                                  "minimum": 240,
+                                  "maximum": 7680,
+                                  "type": "integer"
+                                },
+                                "height": {
+                                  "minimum": 200,
+                                  "maximum": 4320,
+                                  "type": "integer"
+                                },
+                                "dpr": {
+                                  "minimum": 0.5,
+                                  "maximum": 8,
+                                  "type": "number"
+                                },
+                                "visual_scale": {
+                                  "minimum": 0.25,
+                                  "maximum": 8,
+                                  "type": "number"
+                                },
+                                "visual_offset_x": {
+                                  "minimum": -10000,
+                                  "maximum": 10000,
+                                  "type": "number"
+                                },
+                                "visual_offset_y": {
+                                  "minimum": -10000,
+                                  "maximum": 10000,
+                                  "type": "number"
+                                },
+                                "scroll_x": {
+                                  "minimum": 0,
+                                  "maximum": 100000,
+                                  "type": "number"
+                                },
+                                "scroll_y": {
+                                  "minimum": 0,
+                                  "maximum": 100000,
+                                  "type": "number"
+                                },
+                                "document_width": {
+                                  "minimum": 240,
+                                  "maximum": 100000,
+                                  "type": "integer"
+                                },
+                                "document_height": {
+                                  "minimum": 200,
+                                  "maximum": 100000,
+                                  "type": "integer"
+                                }
+                              }
+                            },
+                            "type": {
+                              "const": "hover",
+                              "type": "string"
+                            },
+                            "element_id": {
+                              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,63}$",
+                              "maxLength": 64,
+                              "type": "string"
+                            },
+                            "hover_ms": {
+                              "minimum": 300,
+                              "maximum": 600000,
+                              "type": "number"
+                            }
+                          }
+                        },
+                        {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "required": [
+                            "event_id",
+                            "seq",
+                            "elapsed_ms",
+                            "segment_id",
+                            "viewport",
+                            "type",
+                            "kind",
+                            "reach_percent"
+                          ],
+                          "properties": {
+                            "event_id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "seq": {
+                              "minimum": 0,
+                              "maximum": 20000,
+                              "type": "integer"
+                            },
+                            "elapsed_ms": {
+                              "minimum": 0,
+                              "maximum": 86400000,
+                              "type": "number"
+                            },
+                            "segment_id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "viewport": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "required": [
+                                "width",
+                                "height",
+                                "dpr",
+                                "visual_scale",
+                                "visual_offset_x",
+                                "visual_offset_y",
+                                "scroll_x",
+                                "scroll_y",
+                                "document_width",
+                                "document_height"
+                              ],
+                              "properties": {
+                                "width": {
+                                  "minimum": 240,
+                                  "maximum": 7680,
+                                  "type": "integer"
+                                },
+                                "height": {
+                                  "minimum": 200,
+                                  "maximum": 4320,
+                                  "type": "integer"
+                                },
+                                "dpr": {
+                                  "minimum": 0.5,
+                                  "maximum": 8,
+                                  "type": "number"
+                                },
+                                "visual_scale": {
+                                  "minimum": 0.25,
+                                  "maximum": 8,
+                                  "type": "number"
+                                },
+                                "visual_offset_x": {
+                                  "minimum": -10000,
+                                  "maximum": 10000,
+                                  "type": "number"
+                                },
+                                "visual_offset_y": {
+                                  "minimum": -10000,
+                                  "maximum": 10000,
+                                  "type": "number"
+                                },
+                                "scroll_x": {
+                                  "minimum": 0,
+                                  "maximum": 100000,
+                                  "type": "number"
+                                },
+                                "scroll_y": {
+                                  "minimum": 0,
+                                  "maximum": 100000,
+                                  "type": "number"
+                                },
+                                "document_width": {
+                                  "minimum": 240,
+                                  "maximum": 100000,
+                                  "type": "integer"
+                                },
+                                "document_height": {
+                                  "minimum": 200,
+                                  "maximum": 100000,
+                                  "type": "integer"
+                                }
+                              }
+                            },
+                            "type": {
+                              "const": "exit",
+                              "type": "string"
+                            },
+                            "kind": {
+                              "anyOf": [
+                                {
+                                  "const": "link",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "exit_intent",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "hidden",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "reach_percent": {
+                              "minimum": 0,
+                              "maximum": 100,
+                              "type": "number"
+                            }
+                          }
+                        },
+                        {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "required": [
+                            "event_id",
+                            "seq",
+                            "elapsed_ms",
+                            "segment_id",
+                            "viewport",
+                            "type",
+                            "active_ms",
+                            "idle_ms"
+                          ],
+                          "properties": {
+                            "event_id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "seq": {
+                              "minimum": 0,
+                              "maximum": 20000,
+                              "type": "integer"
+                            },
+                            "elapsed_ms": {
+                              "minimum": 0,
+                              "maximum": 86400000,
+                              "type": "number"
+                            },
+                            "segment_id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "viewport": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "required": [
+                                "width",
+                                "height",
+                                "dpr",
+                                "visual_scale",
+                                "visual_offset_x",
+                                "visual_offset_y",
+                                "scroll_x",
+                                "scroll_y",
+                                "document_width",
+                                "document_height"
+                              ],
+                              "properties": {
+                                "width": {
+                                  "minimum": 240,
+                                  "maximum": 7680,
+                                  "type": "integer"
+                                },
+                                "height": {
+                                  "minimum": 200,
+                                  "maximum": 4320,
+                                  "type": "integer"
+                                },
+                                "dpr": {
+                                  "minimum": 0.5,
+                                  "maximum": 8,
+                                  "type": "number"
+                                },
+                                "visual_scale": {
+                                  "minimum": 0.25,
+                                  "maximum": 8,
+                                  "type": "number"
+                                },
+                                "visual_offset_x": {
+                                  "minimum": -10000,
+                                  "maximum": 10000,
+                                  "type": "number"
+                                },
+                                "visual_offset_y": {
+                                  "minimum": -10000,
+                                  "maximum": 10000,
+                                  "type": "number"
+                                },
+                                "scroll_x": {
+                                  "minimum": 0,
+                                  "maximum": 100000,
+                                  "type": "number"
+                                },
+                                "scroll_y": {
+                                  "minimum": 0,
+                                  "maximum": 100000,
+                                  "type": "number"
+                                },
+                                "document_width": {
+                                  "minimum": 240,
+                                  "maximum": 100000,
+                                  "type": "integer"
+                                },
+                                "document_height": {
+                                  "minimum": 200,
+                                  "maximum": 100000,
+                                  "type": "integer"
+                                }
+                              }
+                            },
+                            "type": {
+                              "const": "engagement",
+                              "type": "string"
+                            },
+                            "active_ms": {
+                              "minimum": 0,
+                              "maximum": 86400000,
+                              "type": "number"
+                            },
+                            "idle_ms": {
+                              "minimum": 0,
+                              "maximum": 86400000,
+                              "type": "number"
+                            },
+                            "first_interaction_ms": {
+                              "minimum": 0,
+                              "maximum": 86400000,
                               "type": "number"
                             }
                           }
@@ -4057,6 +5089,18 @@
                               "type": "string"
                             }
                           ]
+                        },
+                        "other_query_policy": {
+                          "anyOf": [
+                            {
+                              "const": "reject",
+                              "type": "string"
+                            },
+                            {
+                              "const": "ignore",
+                              "type": "string"
+                            }
+                          ]
                         }
                       }
                     }
@@ -5271,7 +6315,7 @@
       "session": {
         "type": "apiKey",
         "in": "cookie",
-        "name": "nb_session"
+        "name": "ir_session"
       }
     }
   }

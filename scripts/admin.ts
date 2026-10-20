@@ -8,7 +8,7 @@ import {seedRegistry} from '../apps/server/seed.js';
 import {config} from '../apps/server/config.js';
 import {requireOffline} from './local-client.js';
 await requireOffline();const command=process.argv[2];if(!['create-user','bootstrap-local'].includes(command||''))throw new Error('Usage: pnpm admin create-user | bootstrap-local');
-const db=await openDB(config.databaseUrl,config.dataDir+'/database');await migrate(db);await seedRegistry(db,config.demoOrigin);
+const db=await openDB(config.databaseUrl,config.dataDir+'/database');await migrate(db);if(config.releaseStatus!=='PRODUCTION')await seedRegistry(db,config.demoOrigin);
 try {
  if(command==='bootstrap-local'){
   if((await db.query('SELECT id FROM users LIMIT 1')).length){console.log('Administrator already exists. No credentials changed.');}

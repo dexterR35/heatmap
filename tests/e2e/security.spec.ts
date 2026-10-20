@@ -18,8 +18,20 @@ test('stored-label XSS probes render as text and unsafe URLs produce no installa
 for(const boundary of ['data-hm-private','data-hm-ignore','contenteditable','form'])test('stops exposure when a registered element becomes '+boundary,async({page})=>{
  const payloads:any[]=[];page.on('request',r=>{if(r.method()==='POST'&&r.url().endsWith('/v1/events'))payloads.push(r.postDataJSON());});
  await page.clock.install();await page.goto(demoOrigin+'/casino/?lp=halloween');await page.clock.pauseAt(new Date(Date.now()+2000));
- await page.getByRole('button',{name:'Allow demo analytics'}).click();await expect.poll(()=>page.evaluate(()=>(window as any).NBHeatmap?.getStatus().state)).toBe('ACTIVE');
+ await page.getByRole('button',{name:'Allow demo analytics'}).click();await expect.poll(()=>page.evaluate(()=>(window as any).InfraredSDK?.getStatus().state)).toBe('ACTIVE');
  await page.evaluate(boundary=>{const hero=document.querySelector('[data-hm-id="hero"]')!;if(boundary==='form'){const form=document.createElement('form');hero.replaceWith(form);form.appendChild(hero);}else hero.setAttribute(boundary,'true');},boundary);
- await page.clock.runFor(2000);await page.evaluate(()=>(window as any).NBHeatmap.flush());
+ await page.clock.runFor(2000);await page.evaluate(()=>(window as any).InfraredSDK.flush());
  const exposures=payloads.flatMap(b=>b.events).filter(e=>e.type==='exposure'&&['hero','hero-register'].includes(e.element_id));expect(exposures).toEqual([]);
+});
+test('malformed host events never break host navigation or grant collection',async({page})=>{
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto(demoOrigin+'/casino/?lp=halloween');
+ await page.getByRole('button',{name:'Allow demo analytics'}).click();await expect.poll(()=>page.evaluate(()=>(window as any).InfraredSDK?.getStatus().state)).toBe('ACTIVE');
+ const result=await page.evaluate(()=>{
+  window.dispatchEvent(new CustomEvent('infrared:context'));window.dispatchEvent(new CustomEvent('infrared:context',{detail:{eligible:'yes'}}));
+  window.dispatchEvent(new CustomEvent('infrared:consent',{detail:{granted:true}}));
+  try{history.pushState({},'',location.href);history.replaceState({},'',location.href);return 'ok';}catch(e){return String(e);}
+ });
+ expect(result).toBe('ok');expect(errors).toEqual([]);
+ await expect.poll(()=>page.evaluate(()=>(window as any).InfraredSDK?.getStatus().state)).not.toBe('ACTIVE');
 });

@@ -1,10 +1,10 @@
 {
-  "included": ["https://go.netbet.ro/casino/?lp=halloween"],
+  "included": ["https://landing.example.com/casino/?lp=halloween"],
   "not_included": [
-    "https://go.netbet.ro/",
-    "https://go.netbet.ro/casino/",
-    "https://go.netbet.ro/casino/?lp=christmas",
-    "https://go.netbet.ro/casino/?lp=halloween&lp=halloween",
-    "https://casino.netbet.ro/casino/?lp=halloween"
+    "https://landing.example.com/",
+    "https://landing.example.com/casino/",
+    "https://landing.example.com/casino/?lp=christmas",
+    "https://landing.example.com/casino/?lp=halloween&lp=halloween",
+    "https://casino.landing.example.com/casino/?lp=halloween"
   ]
 }

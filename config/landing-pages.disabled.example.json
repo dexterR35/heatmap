@@ -1,6 +1,6 @@
 {
   "collection_mode": "selected_pages",
-  "origin": "https://go.netbet.ro",
+  "origin": "https://landing.example.com",
   "environment": "real",
   "enabled": false,
   "approval_state": "pending",
@@ -13,7 +13,7 @@
     "revision": "UNKNOWN",
     "integration_status": "UNKNOWN",
     "selector": {
-      "origin": "https://go.netbet.ro",
+      "origin": "https://landing.example.com",
       "path": "/casino/",
       "query_equals": {"lp": "halloween"},
       "ignored_query_names": [],

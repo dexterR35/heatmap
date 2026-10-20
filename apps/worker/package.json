@@ -2,7 +2,7 @@
   "version": "0.3.0",
   "private": true,
   "type": "module",
-  "name": "@netbet/heatmap-worker",
+  "name": "@infrared/worker",
   "scripts": {
     "start": "pnpm --dir ../.. start:worker"
   }

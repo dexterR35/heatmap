@@ -1,16 +1,24 @@
-# Heatlens by Graphoria
+# Infrared
 
-Landing-page link and pixel verification is available in **Landing pages**, **Markets**, and **Installation**. A saved registry row is a draft, not proof of an installed pixel. See [link, pixel, delivery and timezone checks](docs/INSTALLATION_CHECKS.md).
+Privacy-first heatmaps and conversion analytics, sold as a multi-customer SaaS. Infrared shows where consented visitors click, scroll, move and convert, on campaign landing pages or on whole websites. It is its own product: a custom tracking SDK, validated collector, private API, durable worker, isolated capture runner, PostgreSQL storage, Canvas renderer and React dashboard, with no third-party analytics underneath. See [the structure and data flow](docs/ARCHITECTURE.md) and [the production stack and build plan](docs/PRODUCTION_STACK.md).
 
-A working, private, local-first heatmap monorepo for **selected landing pages**. Its 16 workspace projects include a custom tracking SDK, validated collector, private API, durable worker, isolated capture runner, persistent PostgreSQL-compatible storage, Canvas renderer, and React dashboard. It does not wrap another analytics product. See [the complete structure and data flow](docs/ARCHITECTURE.md).
+## Status
 
-**Release: local synthetic demo. Real-site collection is deliberately disabled.** The supplied NetBet URL is a disabled draft, not a verified installation. See [implementation status](docs/IMPLEMENTATION_STATUS.md) for the difference between this build and the full v1.2 production specification.
+**Not yet released to real customers.** It runs locally with a demo site, and every real site stays closed until an owner approves it. Rollout order: the owner's own website first, then the first customer pilot, then further customers.
 
-The local fixture records actual browser clicks after consent. Dashboard reports default to **Recorded activity**. Generated examples and earlier mixed data are separate sources; neither inflates the recorded metrics. See [the local click verification steps](docs/OPERATIONS.md#seeing-your-actual-local-clicks).
+| Area | State |
+|---|---|
+| Landing pages: exact URLs with any query parameters, ad tags (`utm_*`, `gclid`, `fbclid`…) ignored automatically | Done |
+| Whole-site mode: one snippet, a page per canonical path, include/exclude rules, `/projects/:id` patterns, single-page apps | Done (server and SDK); dashboard settings screen pending |
+| Real collection: owner-only, audited site approval with the reviewed consent policy version; per-site suspend; `RELEASE_STATUS=PRODUCTION` | Done (API); dashboard buttons pending |
+| Visitor IP behind Cloudflare (`TRUSTED_EDGE`, `TRUSTED_PROXIES`), per-visitor quotas | Done |
+| Collected signals: clicks, scroll, exposure, activations, rage and dead clicks, performance, traffic source, device/browser/OS/language, country, attention per section, mouse movement, form fields (no values), CTA hover, exits, engagement time | Done; reports and dashboard views for the newer signals pending |
+| Journeys across pages (opt-in, tab-only session) | Designed, not built |
+| Organizations, billing, company login (SSO), production Docker deployment | Planned, see [PRODUCTION_STACK.md](docs/PRODUCTION_STACK.md) |
 
-The analytics upgrade adds campaign comparisons, ordered CTA funnels, responsive element heatmaps, page revisions, privacy-controlled diagnostics, delivery reporting, scheduled maintenance and OpenTelemetry metrics. See [the analytics guide](docs/ANALYTICS_UPGRADE.md).
+Privacy rules that hold everywhere: no cookies, nothing loads before consent, no typed values, no full URLs or query values, no raw user agent or IP stored, and small samples are suppressed. See [the threat model](docs/THREAT_MODEL.md) and [the security audit](docs/SECURITY_AUDIT.md).
 
-**0.4.0 acquisition & experimentation:** market/product/brand scope, transactional registry import and export, site-scoped backend acquisition integration, deduplicated registration/qualified-acquisition outcomes, reconciled daily spend, A/A and A/B experiments, fixed-horizon validity checks, frozen final readouts, consent withdrawal and shared-scale heatmap comparisons. See [the acquisition and experiments guide](docs/ACQUISITION_EXPERIMENTS.md). The supplied UK Casino URL is a disabled registry draft; its page content was not accessible for inspection. No real-site installation is implied.
+Earlier feature guides: [installation checks](docs/INSTALLATION_CHECKS.md), [analytics](docs/ANALYTICS_UPGRADE.md), [acquisition and experiments](docs/ACQUISITION_EXPERIMENTS.md), [local click verification](docs/OPERATIONS.md#seeing-your-actual-local-clicks).
 
 ## Run on this workstation
 
@@ -60,14 +68,14 @@ Interactive Recharts v3 charts now cover campaigns, funnels, diagnostics, compar
 
 ## What is connected
 
-- **SDK:** page views, pointer coordinates, keyboard/host actions, geometry segments, cumulative scroll reach, visible time, and qualified element exposure; memory-only identities and bounded retries.
-- **Event API:** exact Origin checks, explicit CORS preflight, strict schema validation, 32 KiB body limits, transient source limits, site/day and view quotas, immutable view context, event-ID conflict detection, and commit-before-204 behavior.
+- **SDK:** page views, pointer coordinates, keyboard/host actions, geometry segments, cumulative scroll reach, visible time and qualified element exposure; traffic source and device families classified on the device; attention per 5% band, mouse movement in 8 px cells, opt-in form field timing (never values), CTA hover, exits and engagement time; selected-pages or whole-site mode; memory-only identities and bounded retries. Analytics errors can never break the host page.
+- **Event API:** exact Origin checks, explicit CORS preflight, strict schema validation, 32 KiB body limits, per-visitor and per-source limits, site/day and view quotas, owner-approved sites only, immutable view context, event-ID conflict detection, and commit-before-204 behavior.
 - **Database:** site/page registry, approved static URL selectors, view timestamps/context, event coordinates and viewport geometry, durable jobs, facts, references, sessions, roles, site membership, privacy policy, and audit records. Raw visitor URLs are never collected.
 - **References:** actual screenshots plus validated layout manifests, metadata stripping, private-region masking, SHA-256 checksums, approval, and exact-width/document-height compatibility.
 - **Dashboard:** page/date/device/viewport filters; click, scroll-reach, and registered-element overlays; page comparisons; mapped/excluded coverage; aggregate CSV and annotated PNG exports.
 - **Element reporting:** repeated clicks, distinct exposed/activated views, and exposed-view activation intersections stay within the selected device/viewport, including views that resize.
 - **Privacy:** consent and anonymous-public-context gates, ignored/private regions, no form values or tracking cookies, global and page stops, retention, and a minimum real-data reporting threshold.
-- **Marketing handoff:** generated selected-page script, immutable SDK/SRI, consent/context bridge examples, exact inclusions/exclusions, CSP instructions, verification and rollback runbooks.
+- **Installation:** generated selected-page or whole-site script, immutable SDK/SRI, consent/context bridge examples, exact inclusions/exclusions, CSP instructions, verification and rollback runbooks.
 
 ## Validate
 
@@ -80,7 +88,7 @@ pnpm run doctor
 pnpm test:e2e  # disposable services/database; keeps your recorded data untouched
 ```
 
-Vitest uses isolated databases. Browser tests collect only from loopback synthetic pages. Screenshots are written to `.local/evidence`. No command contacts a real NetBet landing page.
+Vitest uses isolated databases. Browser tests collect only from loopback synthetic pages. Screenshots are written to `.local/evidence`. No command contacts a real customer landing page.
 
 ## PostgreSQL / Docker alternative
 
@@ -111,5 +119,6 @@ Native capture may connect to the Compose dashboard using `ADMIN_EMAIL` and `ADM
 - [Security audit, fixes and production link limits](docs/SECURITY_AUDIT.md)
 - [Implementation status and verification evidence](docs/IMPLEMENTATION_STATUS.md)
 - [Production release gates](docs/PRODUCTION_READINESS.md)
+- [Production stack, staging and build plan](docs/PRODUCTION_STACK.md)
 - [Dependency inventory and primary documentation](docs/DEPENDENCIES.md)
-- [Original supplied build specification](docs/NETBET_HEATMAP_BUILD_SPEC.md)
+- [Original supplied build specification](docs/INITIAL_BUILD_SPEC.md)

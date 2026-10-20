@@ -12,7 +12,7 @@ let db:DB,app:ReturnType<typeof createManagement>,referenceId:string;
 const originalDir=config.dataDir,root=path.resolve('.local'),directory=path.join(root,'adversarial-test-'+randomUUID());
 const host={host:'127.0.0.1:3000'},origin='http://127.0.0.1:3000';
 const tokens={owner:randomUUID(),viewer:randomUUID(),installer:randomUUID()};
-const headers=(role:keyof typeof tokens)=>({...host,cookie:'nb_session='+tokens[role],origin,'x-csrf-token':'synthetic-csrf'});
+const headers=(role:keyof typeof tokens)=>({...host,cookie:'ir_session='+tokens[role],origin,'x-csrf-token':'synthetic-csrf'});
 beforeAll(async()=>{
  db=await testDB();config.dataDir=directory;await mkdir(path.join(directory,'references'),{recursive:true});
  for(const role of ['owner','viewer','installer'] as const){await db.query('INSERT INTO users(id,email,password_hash,role) VALUES($1,$2,$3,$4)',[role,role+'@security.invalid','not-a-login-hash',role]);await db.query("INSERT INTO sessions(token_hash,user_id,csrf,expires_at) VALUES($1,$2,'synthetic-csrf',now()+interval '1 hour')",[digest(tokens[role]),role]);if(role!=='owner')await db.query("INSERT INTO site_memberships(user_id,site_id) VALUES($1,'local-demo')",[role]);}

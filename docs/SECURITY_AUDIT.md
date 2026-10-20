@@ -1,6 +1,6 @@
 # Local application security audit · 2026-10-16
 
-Decision: **LOCAL_DEMO; production release remains blocked.** This is a source review and targeted local adversarial test pass, not an independent penetration test or a certification. Tests use synthetic accounts, fixtures and local endpoints. No external NetBet properties were scanned, instrumented or captured.
+Decision: **LOCAL_DEMO; production release remains blocked.** This is a source review and targeted local adversarial test pass, not an independent penetration test or a certification. Tests use synthetic accounts, fixtures and local endpoints. No external customer properties were scanned, instrumented or captured.
 
 ## Findings and corrections
 

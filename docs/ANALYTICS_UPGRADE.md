@@ -10,7 +10,7 @@ Interactive Recharts v3 views are documented in [CHARTS.md](CHARTS.md). They sha
 
 Recorded activity is the default. Generated samples and earlier unclassified data remain separate. A real-data page below the privacy threshold has its counts suppressed and contributes no counts to portfolio totals. A zero-view synthetic page can be shown with zero observations.
 
-In **Installation → Approved campaign and diagnostic policy**, an owner or scoped administrator can register public campaign codes, choose the primary registered CTA/action, set the published revision, and enable numeric diagnostics. `unknown` must remain allowed. The Marketing host supplies `campaign` as a reviewed static code through `NBHeatmapHost.setContext`; the SDK never derives attribution from raw URL parameters. An unregistered code disables SDK collection and is rejected at ingestion.
+In **Installation → Approved campaign and diagnostic policy**, an owner or scoped administrator can register public campaign codes, choose the primary registered CTA/action, set the published revision, and enable numeric diagnostics. `unknown` must remain allowed. The Marketing host supplies `campaign` as a reviewed static code through `InfraredHost.setContext`; the SDK never derives attribution from raw URL parameters. An unregistered code disables SDK collection and is rejected at ingestion.
 
 ## Ordered funnel and additional metrics
 

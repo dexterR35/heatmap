@@ -2,9 +2,9 @@
 
 Three independent gates are required: explicit analytics consent, a locally matched selected URL with an eligible anonymous public context, and an enabled server-approved synthetic policy. The local manifest is an upper bound; remote configuration cannot broaden it.
 
-`NBHeatmapHost.setConsent('unknown' | 'granted' | 'denied')` is driven by the host CMP subscription. `setContext({eligible,pageKey,revision,locale,variant,state})` is driven by the actual application/router. The custom events `nb:analytics-consent` and `nb:page-context` accept those same values as `CustomEvent.detail`.
+`InfraredHost.setConsent('unknown' | 'granted' | 'denied')` is driven by the host CMP subscription. `setContext({eligible,pageKey,revision,locale,variant,state})` is driven by the actual application/router. The custom events `infrared:consent` and `infrared:context` accept those same values as `CustomEvent.detail`.
 
-The included demo CMP is intentionally fictional. It stores no consent cookie and asks on every new document. It cannot be used as a claim about NetBet's CMP, authentication, jurisdictions or company policy.
+The included demo CMP is intentionally fictional. It stores no consent cookie and asks on every new document. It cannot be used as a claim about any customer's CMP, authentication, jurisdictions or company policy.
 
 The bridge serializes async loader work with a generation counter. The SDK has its own lifecycle generation and AbortController. Withdrawal, navigation and context replacement invalidate pending callbacks. Queries are matched on the client, never sent to the collector for matching. SDK capture and transport each recheck permission.
 

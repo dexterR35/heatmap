@@ -27,7 +27,7 @@ export async function openDB(url?:string, dataDir='.local/database'):Promise<DB>
   return wrap(database);
 }
 export async function migrate(db:DB) {
-  for (const file of ['001_initial.sql','002_capture_and_facts.sql','003_data_sources.sql','004_analytics_operations.sql','005_acquisition_experiments.sql','006_installation_checks.sql']) {
+  for (const file of ['001_initial.sql','002_capture_and_facts.sql','003_data_sources.sql','004_analytics_operations.sql','005_acquisition_experiments.sql','006_installation_checks.sql','007_neutral_brand.sql','008_audience.sql','009_site_approval.sql','010_whole_site.sql','011_journeys.sql']) {
     await db.exec(await readFile(path.resolve('packages/db',file),'utf8'));
   }
 }

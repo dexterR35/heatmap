@@ -1,4 +1,4 @@
-/* White workspace: quiet surfaces, strong type and restrained NetBet orange. */
+/* White workspace: quiet surfaces, strong type and restrained orange. */
 :root {
   color-scheme: light;
   --text-primary: #171717;
@@ -449,3 +449,7 @@ h2,.panel-header h2 { color: #20201c; font-size: 15px; letter-spacing: -.25px; f
  *,*::before,*::after { scroll-behavior: auto !important; transition: none !important; }
  .spin,.loader { animation-duration: 2s; }
 }
+
+/* Inline checkbox with its label text. */
+.check-row { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; line-height: 1.45; }
+.check-row input { width: auto; margin-top: 2px; }

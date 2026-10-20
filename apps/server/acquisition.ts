@@ -8,7 +8,7 @@ export function acquisitionContext(page:any,site:any){return {market:page.market
 export async function eligiblePage(db:DB,siteId:string,pageKey:string,lock=false){
  const[site]=await db.query('SELECT * FROM sites WHERE id=$1'+(lock?' FOR UPDATE':''),[siteId]);
  const[privacy]=await db.query("SELECT value FROM settings WHERE key='privacy'");
- if(!site||site.environment!=='synthetic'||!site.enabled||site.approval_state!=='approved'||privacy.value.global_stop)throw new Problem(403,'COLLECTION_DISABLED');
+ if(!site||!site.enabled||site.approval_state!=='approved'||privacy.value.global_stop)throw new Problem(403,'COLLECTION_DISABLED');
  const[page]=await db.query('SELECT * FROM pages WHERE site_id=$1 AND page_key=$2',[siteId,pageKey]);
  if(!page||!page.enabled||page.approval_state!=='approved')throw new Problem(403,'PAGE_DISABLED');return {site,page,privacy:privacy.value};
 }

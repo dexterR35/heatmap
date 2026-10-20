@@ -4,12 +4,14 @@ import { cohortSegments, deviceForWidth, type SegmentFact } from '../../packages
 import { Problem } from './security.js';
 import {engagement,percentile,type ObservationPoint} from '../../packages/domain/advanced.js';
 import {activitySeries,segmentDevices} from '../../packages/domain/chart-series.js';
+import {audience,attentionBands,engagementSummary,exitSummary,formFunnels,hoverStats,journeySummary,type BehaviourView} from '../../packages/domain/behaviour-report.js';
 
 export interface ReportFilter {
   site_id: string; page_key: string; from?: string; to?: string;
   device?: string; width?: string; revision?: string; reference_id?: string;
   data_source?:'recorded'|'seeded'|'legacy';
   campaign?:string;mapping?:'document'|'element';variant?:string;experiment_id?:string;market?:string;product?:string;brand?:string;
+  channel?:string;browser?:string;os?:string;client_device?:string;country?:string;
 }
 
 export async function report(db: DB, f: ReportFilter, access:{includePendingReferences?:boolean}={}) {
@@ -31,7 +33,9 @@ export async function report(db: DB, f: ReportFilter, access:{includePendingRefe
   if (views.length > 50000) throw new Problem(422, 'REPORT_BUDGET_EXCEEDED');
   const variant=f.variant||page.variant;
   const contextMatches = (c: Record<string, unknown>) => c.revision === revision && c.locale === page.locale && c.variant === variant && c.state === page.state;
-  const contextViews=views.filter(v=>v.has_page_view&&v.aggregation_version>=2&&contextMatches(v.context)&&['market','product','brand'].every(k=>!f[k as keyof ReportFilter]||(v.acquisition_context[k]??'unknown')===f[k as keyof ReportFilter]));
+  // Audience segments come from facts the worker derived on the device-classified page view, and from the edge country.
+  const inSegment=(v:any)=>{const b=v.facts?.behaviour;return (!f.channel||b?.source?.channel===f.channel)&&(!f.browser||b?.client?.browser===f.browser)&&(!f.os||b?.client?.os===f.os)&&(!f.client_device||b?.client?.device===f.client_device)&&(!f.country||v.country===f.country);};
+  const contextViews=views.filter(v=>v.has_page_view&&v.aggregation_version>=2&&contextMatches(v.context)&&inSegment(v)&&['market','product','brand'].every(k=>!f[k as keyof ReportFilter]||(v.acquisition_context[k]??'unknown')===f[k as keyof ReportFilter]));
   const selectedSegments=(v:any)=>cohortSegments(v.facts.segments,f.device,elementMapping?undefined:f.width);
   const confirmed = contextViews.filter(v => selectedSegments(v).length);
 
@@ -73,6 +77,19 @@ export async function report(db: DB, f: ReportFilter, access:{includePendingRefe
     mapped++;
   }
 
+  const moves=await db.query<{view_id:string;payload:Event}>("SELECT e.view_id,e.payload FROM events e JOIN views v ON v.site_id=e.site_id AND v.view_id=e.view_id WHERE e.site_id=$1 AND v.page_key=$2 AND v.started_at>=$3 AND v.started_at<$4 AND v.data_source=$5 AND e.event_type='movement' LIMIT 50001",[f.site_id,f.page_key,from.toISOString(),to.toISOString(),dataSource]);
+  if(moves.length>50000)throw new Problem(422,'REPORT_BUDGET_EXCEEDED');
+  const movement=new Map<string,{x:number;y:number;weight:number}>();let movementMapped=0,movementIncompatible=0;
+  for(const row of moves){
+    if(!ids.has(row.view_id)||row.payload.type!=='movement')continue;const e=row.payload;
+    if((f.device&&f.device!=='all'&&deviceForWidth(e.viewport.width)!==f.device)||(f.width&&e.viewport.width!==+f.width))continue;
+    for(const c of e.cells){
+      const point=elementMapping?null:mapCoordinate({x:c.x,y:c.y,layer:'document',visual_scale:e.viewport.visual_scale,visual_offset_x:e.viewport.visual_offset_x,visual_offset_y:e.viewport.visual_offset_y},e.viewport.width,e.viewport.document_height);
+      if(!point){movementIncompatible+=c.n;continue;}
+      const key=point.x+':'+point.y,existing=movement.get(key);if(existing)existing.weight+=c.n;else movement.set(key,{...point,weight:c.n});movementMapped+=c.n;
+    }
+  }
+
   const dates: Record<string, {date: string; views: number; activations: number}> = {};
   const widthSet = new Set<number>();
   for(const v of contextViews)for(const s of Object.values(v.facts.segments) as SegmentFact[])widthSet.add(s.width);
@@ -108,9 +125,15 @@ export async function report(db: DB, f: ReportFilter, access:{includePendingRefe
   const diagnosticPoints=(kind:'rage_points'|'dead_points')=>{const bins=new Map<string,{x:number;y:number;weight:number}>();let observations=0;for(const v of confirmed)for(const s of selectedSegments(v))for(const p of s.diagnostics?.[kind]??[]){if(++observations>100000)throw new Problem(422,'REPORT_BUDGET_EXCEEDED');const point=mapCoordinate(p,s.width,s.document_height);if(!point)continue;const key=point.x+':'+point.y,existing=bins.get(key);if(existing)existing.weight++;else bins.set(key,point);}return [...bins.values()];};
   const revisions=await db.query("SELECT context->>'revision' AS revision FROM views WHERE site_id=$1 AND page_key=$2 AND data_source=$3 GROUP BY context->>'revision' ORDER BY min(started_at) LIMIT 100",[f.site_id,f.page_key,dataSource]);
   const qualityByView=new Map(qualityRows.map(r=>[r.view_id,r]));
+  const minimum=page.environment==='synthetic'?0:privacy.value.minimum_views,primaryAction=page.primary_action_id??'registration-start';
+  const behaviourViews:BehaviourView[]=confirmed.map(v=>{const segments=selectedSegments(v);return {view_id:v.view_id,country:v.country??null,context:v.context,behaviour:v.facts.behaviour,segments,activated:segments.some(s=>s.actions.includes(primaryAction))};});
+  const sessionIds=[...new Set(confirmed.map(v=>v.context.session_id).filter((id:unknown):id is string=>typeof id==='string'))];
+  const sessionViews=sessionIds.length?await db.query<{session_id:string;session_seq:number;page_key:string}>("SELECT page_key,context->>'session_id' AS session_id,(context->>'session_seq')::int AS session_seq FROM views WHERE site_id=$1 AND data_source=$2 AND context->>'session_id'=ANY($3::text[]) LIMIT 200001",[f.site_id,dataSource,sessionIds]):[];
+  if(sessionViews.length>200000)throw new Problem(422,'REPORT_BUDGET_EXCEEDED');
+  const behaviour={audience:audience(behaviourViews,minimum),attention:attentionBands(scrollSegments),forms:formFunnels(behaviourViews),hover:hoverStats(behaviourViews,page.elements),exits:exitSummary(behaviourViews),engagement:engagementSummary(behaviourViews),journeys:journeySummary(behaviourViews,sessionViews,minimum),movement_points:[...movement.values()],movement_quality:{mapped:movementMapped,incompatible:movementIncompatible}};
   const chartViews=confirmed.map(v=>({started_at:v.started_at,facts:v.facts,segments:selectedSegments(v),received_events:qualityByView.get(v.view_id)?.events??0,delayed_events:qualityByView.get(v.view_id)?.delayed??0})),chartMinimum=page.environment==='synthetic'?0:privacy.value.minimum_views;
   return {
-    suppressed:false as const,page,reference,references,data_source:dataSource,selected_revision:revision,selected_variant:variant,variants:[...new Set([page.variant,...views.map(v=>v.context.variant)])],mapping:elementMapping?'element':'document',campaign:f.campaign??null,revisions:[...new Set([...revisions.map(r=>r.revision),page.revision])],...advanced,rage_points:diagnosticPoints('rage_points'),dead_points:diagnosticPoints('dead_points'),
+    suppressed:false as const,page,reference,references,data_source:dataSource,selected_revision:revision,selected_variant:variant,variants:[...new Set([page.variant,...views.map(v=>v.context.variant)])],mapping:elementMapping?'element':'document',campaign:f.campaign??null,revisions:[...new Set([...revisions.map(r=>r.revision),page.revision])],...advanced,rage_points:diagnosticPoints('rage_points'),dead_points:diagnosticPoints('dead_points'),behaviour,segment_filters:{channel:f.channel??null,browser:f.browser??null,os:f.os??null,client_device:f.client_device??null,country:f.country??null},
     summary: {views: confirmed.length, clicks: clickCount, activated_views: activated, activation_rate: confirmed.length ? 100*activated/confirmed.length : 0, avg_reach: confirmed.length ? reach/confirmed.length : 0, avg_visible_seconds: confirmed.length ? visible/confirmed.length/1000 : 0, exposed_views: exposed, exposed_activated_views: exposedActivated, exposed_activation_rate: exposed ? 100*exposedActivated/exposed : 0},
     points: [...points.values()], daily: Object.values(dates).sort((a,b) => a.date.localeCompare(b.date)), scroll, elements,
     timeseries:activitySeries(chartViews,from.toISOString(),to.toISOString(),page.primary_cta_id,page.primary_action_id,chartMinimum),devices:segmentDevices(chartViews,chartMinimum),

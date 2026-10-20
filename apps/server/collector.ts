@@ -8,19 +8,26 @@ import { Limiter,Problem } from './security.js';
 import { ingest } from './ingestion.js';
 import {instrumentHTTP} from './telemetry.js';
 import {registerAcquisitionCollector} from './growth-routes.js';
+import {config} from '../../packages/config/index.js';
+import {clientAddress,edgeCountry} from './client-address.js';
+export {edgeCountry};
 export function createCollector(db:DB) {
  const app=Fastify({logger:false,bodyLimit:32768,requestTimeout:10000,trustProxy:false,ajv:{customOptions:{removeAdditional:false,coerceTypes:false,useDefaults:false,allErrors:false}}});
  instrumentHTTP(app,'collector');
- const limiter=new Limiter(),rejections=new Map<string,number>();
- app.addHook('onRequest',async(req,reply)=>{reply.header('X-Content-Type-Options','nosniff').header('Vary','Origin').header('Cache-Control','no-store');if(req.headers['content-encoding'])throw new Problem(415,'ENCODING_NOT_SUPPORTED');limiter.check(req.ip,600);});
+ const limiter=new Limiter(),rejections=new Map<string,number>(),approved=new Map<string,number>();
+ app.addHook('onRequest',async(req,reply)=>{reply.header('X-Content-Type-Options','nosniff').header('Vary','Origin').header('Cache-Control','no-store');if(req.headers['content-encoding'])throw new Problem(415,'ENCODING_NOT_SUPPORTED');limiter.check(clientAddress(req),600);});
  app.setErrorHandler<FastifyError>((err,req,reply)=>{
   const status=err instanceof Problem?err.status:err.validation?400:err.statusCode&&err.statusCode<500?err.statusCode:503;
   const code=err instanceof Problem?err.code:err.validation?'INVALID_EVENT_SCHEMA':status===503?'TEMPORARILY_UNAVAILABLE':'INVALID_REQUEST';
-  rejections.set(code,(rejections.get(code)||0)+1);if(status===429||status===503)reply.header('Retry-After','5');reply.code(status).send({error:{code}});
+  rejections.set(code,(rejections.get(code)||0)+1);if(status===429||status===503)reply.header('Retry-After','5');
+  // Approved pages must be able to read the rejection, or the SDK treats it as a network failure and retries.
+  const origin=req.headers.origin;if(typeof origin==='string'&&(approved.get(origin)??0)>Date.now())reply.header('Access-Control-Allow-Origin',origin);
+  reply.code(status).send({error:{code}});
  });
  const checkOrigin=async(origin:unknown)=>{
   if(typeof origin!=='string'||origin==='null')throw new Problem(403,'ORIGIN_NOT_ALLOWED');
-  const [site]=await db.query("SELECT id FROM sites WHERE origin=$1 AND enabled=true AND approval_state='approved' AND environment='synthetic'",[origin]);if(!site)throw new Problem(403,'ORIGIN_NOT_ALLOWED');return origin;
+  const [site]=await db.query("SELECT id FROM sites WHERE origin=$1 AND enabled=true AND approval_state='approved' AND (environment<>'synthetic' OR $2)",[origin,config.releaseStatus!=='PRODUCTION']);if(!site)throw new Problem(403,'ORIGIN_NOT_ALLOWED');
+  approved.delete(origin);approved.set(origin,Date.now()+60000);if(approved.size>1000)approved.delete(approved.keys().next().value!);return origin;
  };
  app.get('/healthz',async()=>({status:'ok'}));
  app.get<{Params:{file:string}}>('/sdk/v1/:file',async(req,reply)=>{
@@ -41,12 +48,14 @@ export function createCollector(db:DB) {
   const pages=await db.query("SELECT page_key,selector,revision,locale,variant,state,elements,actions,campaign_codes,diagnostics_enabled,diagnostic_error_codes FROM pages WHERE site_id=$1 AND enabled=true AND approval_state='approved'",[site.id]);
   const experimental=await db.query("SELECT id,page_key,control_variant,treatment_variant,revision FROM experiments WHERE site_id=$1 AND status IN ('running','paused')",[site.id]);
   for(const page of pages)page.approved_contexts=experimental.filter(e=>e.page_key===page.page_key&&e.revision===page.revision).flatMap(e=>[e.control_variant,e.treatment_variant].map(variant=>({experiment_id:e.id,revision:e.revision,locale:page.locale,state:page.state,variant})));
-  return reply.header('Access-Control-Allow-Origin',origin).header('ETag','"'+site.config_version+'"').send({schema_version:2,enabled:site.enabled&&!privacy.value.global_stop,config_version:site.config_version,expires_in:60,sample_rate:site.sample_rate,site_key:site.site_key,features:['diagnostics-v1','delivery-v1'],pages});
+  return reply.header('Access-Control-Allow-Origin',origin).header('ETag','"'+site.config_version+'"').send({schema_version:2,enabled:site.enabled&&!privacy.value.global_stop,config_version:site.config_version,expires_in:60,sample_rate:site.sample_rate,site_key:site.site_key,features:['diagnostics-v1','delivery-v1'],...(site.journeys_enabled?{journeys:true}:{}),pages:site.collection_mode==='whole_site'?[]:pages,...(site.collection_mode==='whole_site'?{collection_mode:'whole_site',rules:site.site_rules,site_elements:site.site_elements,site_actions:site.site_actions,disabled_page_keys:(await db.query('SELECT page_key FROM pages WHERE site_id=$1 AND auto AND NOT enabled LIMIT 1000',[site.id])).map(r=>r.page_key)}:{})});
  });
  app.post<{Body:Batch}>('/v1/events',{schema:{body:batchSchema}},async(req,reply)=>{
   const origin=await checkOrigin(req.headers.origin);reply.header('Access-Control-Allow-Origin',origin);
-  limiter.check('site:'+req.body.site_key,1200);limiter.check('view:'+req.body.view_id,90);
-  await ingest(db,req.body,origin);return reply.code(204).send();
+  limiter.check('site:'+origin,1200);limiter.check('view:'+origin+':'+req.body.view_id,90);
+  // One source cannot spend a site's daily quota: forged traffic is capped per visitor address and site.
+  limiter.check('daily:'+origin+':'+clientAddress(req),5000,86400000);
+  await ingest(db,req.body,origin,'recorded',edgeCountry(req));return reply.code(204).send();
  });
  registerAcquisitionCollector(app,db);
  return {app,rejections};

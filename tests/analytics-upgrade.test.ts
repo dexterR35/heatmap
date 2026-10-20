@@ -10,12 +10,12 @@ import {report} from '../apps/server/analytics.js';
 import {portfolio} from '../apps/server/campaigns.js';
 import {digest} from '../apps/server/security.js';
 let db:DB,collector:ReturnType<typeof createCollector>,app:ReturnType<typeof createManagement>;
-const session=randomUUID(),viewer=randomUUID(),headers={host:'127.0.0.1:3000',origin:'http://127.0.0.1:3000',cookie:'nb_session='+session,'x-csrf-token':'test'};
+const session=randomUUID(),viewer=randomUUID(),headers={host:'127.0.0.1:3000',origin:'http://127.0.0.1:3000',cookie:'ir_session='+session,'x-csrf-token':'test'};
 beforeAll(async()=>{db=await testDB();collector=createCollector(db);app=createManagement(db,new Map());await collector.app.ready();await app.ready();for(const[id,role,key]of [['owner','owner',session],['viewer','viewer',viewer]]){await db.query('INSERT INTO users(id,email,password_hash,role) VALUES($1,$2,$3,$4)',[id,id+'@example.invalid','not-a-login-hash',role]);await db.query("INSERT INTO sessions(token_hash,user_id,csrf,expires_at) VALUES($1,$2,'test',now()+interval '1 hour')",[digest(key),id]);}await db.query("INSERT INTO site_memberships(user_id,site_id) VALUES('viewer','local-demo')");});
 afterAll(async()=>{await app.close();await collector.app.close();await db.close();});
 it('allows policy edits only for authorized roles and approved registered identifiers',async()=>{
  const url='/api/pages/local-demo/casino-halloween/policy',payload={campaign_codes:['unknown','launch-2026'],diagnostics_enabled:true,diagnostic_error_codes:['runtime-error','unhandled-rejection'],primary_cta_id:'hero-register',primary_action_id:'registration-start'};
- expect((await app.inject({method:'PATCH',url,headers:{...headers,cookie:'nb_session='+viewer},payload})).statusCode).toBe(403);
+ expect((await app.inject({method:'PATCH',url,headers:{...headers,cookie:'ir_session='+viewer},payload})).statusCode).toBe(403);
  expect((await app.inject({method:'PATCH',url,headers,payload:{...payload,primary_cta_id:'unregistered'}})).statusCode).toBe(422);
  expect((await app.inject({method:'PATCH',url,headers,payload})).statusCode).toBe(200);
  const b=batch();b.context.campaign='launch-2026';b.config_version=2;await ingest(db,b,demoOrigin);const unknown=batch();unknown.context.campaign='secret-unapproved';await expect(ingest(db,unknown,demoOrigin)).rejects.toMatchObject({code:'UNREGISTERED_CONTEXT'});await processJobs(db);
@@ -40,7 +40,7 @@ it('excludes shifted visual viewport coordinates from diagnostic overlays',async
 it('keeps version cohorts independent and prevents private operations access',async()=>{
  const policy=await app.inject({method:'PATCH',url:'/api/pages/local-demo/casino-halloween/policy',headers,payload:{revision:'demo-v2',campaign_codes:['unknown','launch-2026'],diagnostics_enabled:true,diagnostic_error_codes:['runtime-error'],primary_cta_id:'hero-register',primary_action_id:'registration-start'}});expect(policy.statusCode).toBe(200);await expect(ingest(db,batch(),demoOrigin)).rejects.toMatchObject({code:'UNREGISTERED_CONTEXT'});const b=batch();b.context.revision='demo-v2';await ingest(db,b,demoOrigin);await processJobs(db);
  const r=await app.inject({url:'/api/reports/versions?site_id=local-demo&page_key=casino-halloween&revision_a=demo-v1&revision_b=demo-v2',headers});expect(r.statusCode).toBe(200);expect(r.json().reports.map((x:any)=>x.selected_revision)).toEqual(['demo-v1','demo-v2']);expect(r.json().reports[1].summary.views).toBe(1);
- expect((await app.inject({url:'/api/operations',headers:{...headers,cookie:'nb_session='+viewer}})).statusCode).toBe(403);
+ expect((await app.inject({url:'/api/operations',headers:{...headers,cookie:'ir_session='+viewer}})).statusCode).toBe(403);
  expect((await app.inject({url:'/api/operations',headers})).statusCode).toBe(200);
  expect((await app.inject({method:'PATCH',url:'/api/operations/settings',headers,payload:{automatic_backup:true}})).statusCode).toBe(400);
 });

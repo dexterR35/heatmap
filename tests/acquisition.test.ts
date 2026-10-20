@@ -13,8 +13,8 @@ import {report} from '../apps/server/analytics.js';
 import {importRegistry} from '../apps/server/registry.js';
 import type {RegistryRow,VisitInput} from '../packages/contracts/acquisition.js';
 let db:DB,app:ReturnType<typeof createManagement>,collector:ReturnType<typeof createCollector>;
-const session=randomUUID(),viewer=randomUUID(),headers={host:'127.0.0.1:3000',origin:'http://127.0.0.1:3000',cookie:'nb_session='+session,'x-csrf-token':'growth-test'};
-const row:RegistryRow={name:'UK offer',page_key:'uk-offer',url:'https://growth.example.invalid/casino/?lp=uk-offer',market:'UK',product:'casino',brand:'netbet',locale:'en-GB',currency:'GBP',report_timezone:'Europe/London',page_family:'max',acquisition_goal:'registration_completed'};
+const session=randomUUID(),viewer=randomUUID(),headers={host:'127.0.0.1:3000',origin:'http://127.0.0.1:3000',cookie:'ir_session='+session,'x-csrf-token':'growth-test'};
+const row:RegistryRow={name:'UK offer',page_key:'uk-offer',url:'https://growth.example.invalid/casino/?lp=uk-offer',market:'UK',product:'casino',brand:'example',locale:'en-GB',currency:'GBP',report_timezone:'Europe/London',page_family:'max',acquisition_goal:'registration_completed'};
 const visit=(experiment_id?:string):VisitInput=>({receipt_id:randomUUID(),page_key:'casino-halloween',unit_token:digest(randomUUID()),campaign:'unknown',device:'mobile',analytics_consent:true,public_context:true,policy_version:'demo-v1',...(experiment_id?{experiment_id}:{})});
 const definition=()=>({site_id:'local-demo',page_key:'casino-halloween',name:'Local acquisition test',kind:'ab' as const,primary_metric:'registration_completed' as const,control_variant:'control',treatment_variant:'treatment',baseline_rate:.05,mde_relative:.2,minimum_days:14,attribution_hours:24});
 beforeAll(async()=>{db=await testDB();app=createManagement(db,new Map());collector=createCollector(db);await app.ready();await collector.app.ready();for(const[id,role,key]of [['growth-owner','owner',session],['growth-viewer','viewer',viewer]]){await db.query('INSERT INTO users(id,email,password_hash,role) VALUES($1,$2,$3,$4)',[id,id+'@example.invalid','not-a-login-hash',role]);await db.query("INSERT INTO sessions(token_hash,user_id,csrf,expires_at) VALUES($1,$2,'growth-test',now()+interval '1 hour')",[digest(key),id]);}await db.query("INSERT INTO site_memberships(user_id,site_id) VALUES('growth-viewer','local-demo')");});
@@ -26,7 +26,7 @@ it('validates imports atomically, rejects broad/ambiguous scopes, and preserves 
  const pages=await db.query('SELECT p.enabled,p.approval_state,s.environment FROM pages p JOIN sites s ON s.id=p.site_id WHERE s.origin=$1',['https://growth.example.invalid']);expect(pages).toHaveLength(2);expect(pages.every(p=>p.enabled===false&&p.approval_state==='pending'&&p.environment==='real')).toBe(true);
  expect((await importRegistry(db,[{...row,page_key:'collision'}],true,true,async()=>{})).errors[0].code).toBe('SELECTOR_OVERLAP');
  expect((await importRegistry(db,[{...row,report_timezone:'not/a/timezone'}],true,true,async()=>{})).errors[0].code).toBe('TIMEZONE_INVALID');
- expect((await app.inject({method:'POST',url:'/api/registry/import',headers:{...headers,cookie:'nb_session='+viewer},payload:{dry_run:true,rows:[row]}})).statusCode).toBe(403);
+ expect((await app.inject({method:'POST',url:'/api/registry/import',headers:{...headers,cookie:'ir_session='+viewer},payload:{dry_run:true,rows:[row]}})).statusCode).toBe(403);
 });
 it('uses site-scoped backend keys, rejects browser use and revocation, and keeps real collection gated',async()=>{
  const created=await app.inject({method:'POST',url:'/api/sites/local-demo/acquisition-keys',headers,payload:{name:'Test host'}});expect(created.statusCode).toBe(200);const key=created.json();expect(key.key).toMatch(/^ak_/);
@@ -36,7 +36,7 @@ it('uses site-scoped backend keys, rejects browser use and revocation, and keeps
  expect((await collector.app.inject({method:'POST',url:'/v1/acquisition/visits',headers:backend,payload:{...payload,email:'private@example.invalid'}})).statusCode).toBe(400);
  expect((await app.inject({url:'/api/sites/local-demo/acquisition-keys',headers})).body).not.toContain(key.key);
  await app.inject({method:'POST',url:`/api/acquisition-keys/${key.id}/revoke`,headers,payload:{}});expect((await collector.app.inject({method:'POST',url:'/v1/acquisition/visits',headers:backend,payload:visit()})).statusCode).toBe(401);
- const real=await app.inject({method:'POST',url:'/api/sites/netbet-ro-go/acquisition-keys',headers,payload:{name:'Disabled real draft'}});expect(real.statusCode).toBe(200);expect((await collector.app.inject({method:'POST',url:'/v1/acquisition/visits',headers:{'x-acquisition-key':real.json().key},payload:visit()})).statusCode).toBe(403);
+ const real=await app.inject({method:'POST',url:'/api/sites/example-real/acquisition-keys',headers,payload:{name:'Disabled real draft'}});expect(real.statusCode).toBe(200);expect((await collector.app.inject({method:'POST',url:'/v1/acquisition/visits',headers:{'x-acquisition-key':real.json().key},payload:visit()})).statusCode).toBe(403);
 });
 it('keeps sticky randomized assignment, guards lifecycle, and validates actual rendered context',async()=>{
  const e=await createExperiment(db,definition());await changeExperimentState(db,e.id,'running');
@@ -60,7 +60,7 @@ it('deduplicates backend outcomes and never invents a completed registration fro
  expect((await recordAcquisitionOutcome(db,'local-demo',{...payload,event_id:randomUUID()})).duplicate).toBe(true);
  await expect(recordAcquisitionOutcome(db,'local-demo',{...payload,kind:'qualified_acquisition'})).rejects.toMatchObject({code:'OUTCOME_RECEIPT_CONFLICT'});
  await expect(recordAcquisitionOutcome(db,'local-demo',{...payload,event_id:randomUUID(),occurred_at:new Date(Date.now()+8*86400000).toISOString()})).rejects.toMatchObject({code:'OUTCOME_OUTSIDE_WINDOW'});
- await expect(recordAcquisitionOutcome(db,'netbet-ro-go',payload)).rejects.toMatchObject({code:'VISIT_NOT_FOUND'});
+ await expect(recordAcquisitionOutcome(db,'example-real',payload)).rejects.toMatchObject({code:'VISIT_NOT_FOUND'});
  expect((await db.query('SELECT * FROM acquisition_outcomes WHERE visit_id=$1',[v.visit_id]))).toHaveLength(1);
  const ordinary=batch();await ingest(db,ordinary,demoOrigin);await processJobs(db);expect((await db.query('SELECT * FROM acquisition_outcomes WHERE visit_id=$1',[ordinary.view_id]))).toHaveLength(0);
 });
@@ -75,7 +75,7 @@ it('requires reconciled matching daily spend and closed windows before acquisiti
  expect((await acquisitionReport(db,{...filters,device:'mobile'},['local-demo'])).rows[0].cost_per_acquisition).toBeNull();
  expect((await acquisitionReport(db,{...filters,market:'does-not-exist'},['local-demo'])).rows).toHaveLength(0);
  await expect(writeSpend(db,{...spend,currency:'EUR'})).rejects.toMatchObject({code:'SPEND_CURRENCY_INVALID'});
- expect((await app.inject({url:'/api/acquisition?site_id=netbet-ro-go',headers:{...headers,cookie:'nb_session='+viewer}})).statusCode).toBe(404);
+ expect((await app.inject({url:'/api/acquisition?site_id=example-real',headers:{...headers,cookie:'ir_session='+viewer}})).statusCode).toBe(404);
 });
 it('withdraws the site-scoped unit and linked heatmap evidence, including while collection is stopped',async()=>{
  const e=await createExperiment(db,{...definition(),page_key:'casino-christmas',treatment_variant:'privacy-candidate'});await changeExperimentState(db,e.id,'running');
@@ -100,4 +100,10 @@ it('freezes only a valid matured readout, preserves its aggregates through reten
  await expect(recordAcquisitionOutcome(db,'local-demo',{visit_id:assigned[0].visit_id,event_id:randomUUID(),kind:'registration_completed',occurred_at:new Date(Date.now()-5400000).toISOString()})).rejects.toMatchObject({code:'EXPERIMENT_READOUT_FROZEN'});
  await db.query("UPDATE acquisition_visits SET created_at=now()-interval '31 days' WHERE experiment_id=$1",[e.id]);await retention(db,'.local/unused-retention-fixture');
  expect((await db.query('SELECT id FROM acquisition_visits WHERE experiment_id=$1',[e.id]))).toHaveLength(0);const archived=await experimentReadout(db,e.id);expect(archived.archived).toBe(true);expect(archived.control.assigned+archived.treatment.assigned).toBe(assigned.length);expect(archived.ready).toBe(true);
+});
+it('drops marketing tags from imported URLs and defaults to the ignore policy',async()=>{
+ const r=await importRegistry(db,[{...row,page_key:'tagged-offer',url:'https://tagged.example.invalid/casino/?lp=tagged&utm_source=google&gclid=abc'}],false,true,async()=>{});
+ expect(r.errors).toEqual([]);
+ const [page]=await db.query("SELECT p.selector FROM pages p JOIN sites s ON s.id=p.site_id WHERE s.origin='https://tagged.example.invalid' AND p.page_key='tagged-offer'");
+ expect(page.selector).toMatchObject({query_equals:{lp:'tagged'},other_query_policy:'ignore'});
 });

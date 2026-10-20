@@ -16,7 +16,7 @@ Before a staged or real-data release, complete and evidence:
 - Configuration lifecycle compatibility across upgrades, stronger schema migrations/rollback tooling, immutable release provenance and dependency/container scanning in CI.
 - Production approval of data deletion/export expiry, backup access/encryption/offsite expiry and the implemented operational retention/backup schedules. Validate the implemented worker backoff/failed-job recovery under production faults and load.
 - A reviewed non-root browser sandbox and constrained egress before permitting capture of any non-fixture URL.
-- Wider adversarial, performance, recovery, accessibility and deployment testing. Current browser evidence covers Chromium only; Safari/Firefox and actual NetBet integrations are unverified.
+- Wider adversarial, performance, recovery, accessibility and deployment testing. Current browser evidence covers Chromium only; Safari/Firefox and actual customer integrations are unverified.
 - Optional advanced portfolio hierarchy, registry import dry-runs, explicit page groups, live rollout approval records if required for the release scope. Element-relative mapping is now implemented locally.
 
 Do not enable real collection by changing SQL flags. The collector rejects non-synthetic properties independently. Approval is a release decision supported by evidence; this document grants none.
